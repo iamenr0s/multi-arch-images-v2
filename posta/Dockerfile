@@ -1,7 +1,8 @@
 # Stage 1: Clone upstream source
 FROM alpine:3.21 AS source
+ARG POSTA_REF=main
 RUN apk add --no-cache git
-RUN git clone https://github.com/goposta/posta /app
+RUN git clone --depth 1 --branch ${POSTA_REF} https://github.com/goposta/posta /app
 
 # Stage 2: Build UI
 FROM node:22-alpine AS ui-builder
@@ -32,12 +33,14 @@ RUN CGO_ENABLED=0 go build \
 FROM alpine:3.21
 ARG VERSION=dev
 ARG COMMIT=unknown
+ARG BUILD_DATE=unknown
 LABEL org.opencontainers.image.title="posta" \
       org.opencontainers.image.description="Posta is a self-hosted email delivery platform" \
       org.opencontainers.image.licenses="Apache" \
       org.opencontainers.image.source="https://github.com/goposta/posta" \
       org.opencontainers.image.version="${VERSION}" \
-      org.opencontainers.image.revision="${COMMIT}"
+      org.opencontainers.image.revision="${COMMIT}" \
+      org.opencontainers.image.created="${BUILD_DATE}"
 RUN apk add --no-cache ca-certificates tzdata \
     && addgroup -S posta && adduser -S posta -G posta
 COPY --from=builder /bin/posta /bin/posta
