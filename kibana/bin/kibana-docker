@@ -1,0 +1,50 @@
+#!/bin/bash
+
+kibana_vars=(
+    console.enabled
+    elasticsearch.hosts
+    elasticsearch.password
+    elasticsearch.pingTimeout
+    elasticsearch.requestTimeout
+    elasticsearch.ssl.certificate
+    elasticsearch.ssl.certificateAuthorities
+    elasticsearch.ssl.key
+    elasticsearch.ssl.verificationMode
+    elasticsearch.username
+    i18n.locale
+    kibana.defaultAppId
+    kibana.index
+    logging.dest
+    logging.quiet
+    logging.silent
+    logging.verbose
+    ops.interval
+    path.data
+    pid.file
+    server.basePath
+    server.host
+    server.maxPayloadBytes
+    server.name
+    server.port
+    server.rewriteBasePath
+    server.ssl.certificate
+    server.ssl.certificateAuthorities
+    server.ssl.enabled
+    server.ssl.key
+    xpack.monitoring.enabled
+    xpack.security.enabled
+)
+
+longopts=''
+for kibana_var in ${kibana_vars[*]}; do
+    env_var=$(echo ${kibana_var^^} | tr . _)
+    value=${!env_var}
+    if [[ -n $value ]]; then
+        longopt="--${kibana_var}=${value}"
+        longopts+=" ${longopt}"
+    fi
+done
+
+umask 0002
+
+exec /usr/share/kibana/bin/kibana --cpu.cgroup.path.override=/ --cpuacct.cgroup.path.override=/ ${longopts} "$@"

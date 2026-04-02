@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+source /bd_build/buildconfig
+set -x
+
+cp /bd_build/bin/my_init /sbin/
+mkdir -p /etc/my_init.d
+mkdir -p /etc/my_init.pre_shutdown.d
+mkdir -p /etc/my_init.post_shutdown.d
+mkdir -p /etc/container_environment
+touch /etc/container_environment.sh
+touch /etc/container_environment.json
+chmod 700 /etc/container_environment
+
+groupadd -g 8377 docker_env
+chown :docker_env /etc/container_environment.sh /etc/container_environment.json
+chmod 640 /etc/container_environment.sh /etc/container_environment.json
+ln -s /etc/container_environment.sh /etc/profile.d/
+
+$minimal_apt_get_install runit
+
+[ "$DISABLE_SYSLOG" -eq 0 ] && /bd_build/services/syslog-ng/syslog-ng.sh || true
+[ "$DISABLE_SSH" -eq 0 ] && /bd_build/services/sshd/sshd.sh || true
+[ "$DISABLE_CRON" -eq 0 ] && /bd_build/services/cron/cron.sh || true
