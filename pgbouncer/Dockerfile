@@ -6,8 +6,10 @@ WORKDIR /
 RUN apk --update add python3 py3-pip build-base automake libtool m4 autoconf libevent-dev openssl-dev c-ares-dev curl
 RUN pip3 install --break-system-packages docutils \
  && curl -sL https://github.com/pgbouncer/pgbouncer/archive/refs/tags/pgbouncer_$(echo "$PGBOUNCER_VERSION" | sed 's/\./\_/g').tar.gz -o pgbouncer.tar.gz \
- && tar zxf pgbouncer.tar.gz && rm pgbouncer.tar.gz \
- && cd /pgbouncer-${PGBOUNCER_VERSION}/ \
+ && mkdir /pgbouncer-src \
+ && tar zxf pgbouncer.tar.gz --strip-components=1 -C /pgbouncer-src \
+ && rm pgbouncer.tar.gz \
+ && cd /pgbouncer-src \
  && ./configure --prefix=/pgbouncer \
  && make \
  && make install
