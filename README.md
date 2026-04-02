@@ -16,7 +16,6 @@ Multi-architecture (amd64 + arm64) container images built with Podman and publis
 | kibana | `quay.io/iamenr0s/kibana` | `docker.io/iamenr0s/kibana` | Kibana OSS 7.17.28 (AlmaLinux 9) |
 | motioneye | `quay.io/iamenr0s/motioneye` | `docker.io/iamenr0s/motioneye` | Debian bookworm-slim |
 | packer-build-qemu | `quay.io/iamenr0s/packer-build-qemu` | `docker.io/iamenr0s/packer-build-qemu` | Packer 1.11.2 (Alpine 3.21) |
-| pgbouncer | `quay.io/iamenr0s/pgbouncer` | `docker.io/iamenr0s/pgbouncer` | pgbouncer 1.25.1 (Alpine 3.21) |
 | posta | `quay.io/iamenr0s/posta` | `docker.io/iamenr0s/posta` | Self-hosted email platform |
 | ubi-quarkus-native-image | `quay.io/iamenr0s/ubi-quarkus-native-image` | `docker.io/iamenr0s/ubi-quarkus-native-image` | GraalVM CE 22.3.3 / Java 17 |
 
