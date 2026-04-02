@@ -1,18 +1,17 @@
-ARG BASE_IMAGE=debian:bookworm-slim
-FROM $BASE_IMAGE
+FROM debian:bookworm-slim
 
-ARG QEMU_ARCH
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
 
-RUN mkdir /bd_build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        locales \
+        tzdata \
+    && sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
+    && locale-gen \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY . /bd_build
-
-RUN chmod +x /bd_build/*.sh && /bd_build/prepare.sh && \
- /bd_build/system_services.sh && \
- /bd_build/utilities.sh && \
- /bd_build/cleanup.sh
-
-ENV DEBIAN_FRONTEND="teletype" \
- LANG="en_US.UTF-8" \
- LANGUAGE="en_US:en" \
- LC_ALL="en_US.UTF-8"
+ENV DEBIAN_FRONTEND=teletype
