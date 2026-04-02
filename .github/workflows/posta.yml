@@ -14,6 +14,9 @@ jobs:
   build:
     name: Build multi-arch image
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -24,9 +27,27 @@ jobs:
 
       - name: Get upstream posta version info
         id: upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          LATEST_TAG=$(curl -s https://api.github.com/repos/goposta/posta/releases/latest | jq -r '.tag_name // "main"')
-          LATEST_COMMIT=$(curl -s "https://api.github.com/repos/goposta/posta/git/ref/tags/${LATEST_TAG}" | jq -r '.object.sha' | cut -c1-7)
+          set -euo pipefail
+          LATEST_TAG=$(curl -sf -H "Authorization: Bearer ${GH_TOKEN}" \
+            https://api.github.com/repos/goposta/posta/releases/latest | jq -r '.tag_name // empty')
+          if [[ -z "${LATEST_TAG}" ]]; then
+            echo "ERROR: Could not determine upstream posta version" >&2
+            exit 1
+          fi
+          TAG_OBJ=$(curl -sf -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/repos/goposta/posta/git/ref/tags/${LATEST_TAG}")
+          TAG_SHA=$(echo "${TAG_OBJ}" | jq -r '.object.sha')
+          TAG_TYPE=$(echo "${TAG_OBJ}" | jq -r '.object.type')
+          if [[ "${TAG_TYPE}" == "tag" ]]; then
+            LATEST_COMMIT=$(curl -sf -H "Authorization: Bearer ${GH_TOKEN}" \
+              "https://api.github.com/repos/goposta/posta/git/tags/${TAG_SHA}" \
+              | jq -r '.object.sha' | cut -c1-7)
+          else
+            LATEST_COMMIT=$(echo "${TAG_SHA}" | cut -c1-7)
+          fi
           BUILD_DATE=$(date -u +%Y-%m-%d)
           echo "version=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
           echo "commit=${LATEST_COMMIT}" >> "$GITHUB_OUTPUT"
@@ -53,39 +74,51 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build amd64
+        env:
+          VERSION: ${{ steps.upstream.outputs.version }}
+          COMMIT: ${{ steps.upstream.outputs.commit }}
+          BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
         run: |
           podman build \
             --platform linux/amd64 \
             --manifest posta \
-            --build-arg VERSION=${{ steps.upstream.outputs.version }} \
-            --build-arg COMMIT=${{ steps.upstream.outputs.commit }} \
-            --build-arg BUILD_DATE=${{ steps.upstream.outputs.build_date }} \
-            --build-arg POSTA_REF=${{ steps.upstream.outputs.version }} \
+            --build-arg "VERSION=${VERSION}" \
+            --build-arg "COMMIT=${COMMIT}" \
+            --build-arg "BUILD_DATE=${BUILD_DATE}" \
+            --build-arg "POSTA_REF=${VERSION}" \
             -f posta/Dockerfile \
             posta/
 
       - name: Build arm64
+        env:
+          VERSION: ${{ steps.upstream.outputs.version }}
+          COMMIT: ${{ steps.upstream.outputs.commit }}
+          BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
         run: |
           podman build \
             --platform linux/arm64 \
             --manifest posta \
-            --build-arg VERSION=${{ steps.upstream.outputs.version }} \
-            --build-arg COMMIT=${{ steps.upstream.outputs.commit }} \
-            --build-arg BUILD_DATE=${{ steps.upstream.outputs.build_date }} \
-            --build-arg POSTA_REF=${{ steps.upstream.outputs.version }} \
+            --build-arg "VERSION=${VERSION}" \
+            --build-arg "COMMIT=${COMMIT}" \
+            --build-arg "BUILD_DATE=${BUILD_DATE}" \
+            --build-arg "POSTA_REF=${VERSION}" \
             -f posta/Dockerfile \
             posta/
 
       - name: Push to Quay.io
+        env:
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
         run: |
           podman manifest push --all posta \
             quay.io/iamenr0s/posta:latest
           podman manifest push --all posta \
-            quay.io/iamenr0s/posta:${{ steps.tags.outputs.short_sha }}
+            "quay.io/iamenr0s/posta:${SHORT_SHA}"
 
       - name: Push to Docker Hub
+        env:
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
         run: |
           podman manifest push --all posta \
             docker.io/iamenr0s/posta:latest
           podman manifest push --all posta \
-            docker.io/iamenr0s/posta:${{ steps.tags.outputs.short_sha }}
+            "docker.io/iamenr0s/posta:${SHORT_SHA}"
