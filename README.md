@@ -6,18 +6,18 @@ Multi-architecture (amd64 + arm64) container images built with Podman and publis
 
 | App | Quay.io | Docker Hub | Notes |
 |---|---|---|---|
-| baseimage | `quay.io/iamenr0s/baseimage` | `docker.io/iamenr0s/baseimage` | Debian bookworm-slim base with runit, syslog-ng, sshd, cron |
-| csi-external-attacher | `quay.io/iamenr0s/csi-external-attacher` | `docker.io/iamenr0s/csi-external-attacher` | Kubernetes CSI sidecar |
-| csi-external-provisioner | `quay.io/iamenr0s/csi-external-provisioner` | `docker.io/iamenr0s/csi-external-provisioner` | Kubernetes CSI sidecar |
-| csi-node-driver-registrar | `quay.io/iamenr0s/csi-node-driver-registrar` | `docker.io/iamenr0s/csi-node-driver-registrar` | Kubernetes CSI sidecar |
-| docker-ansible-ubuntu2004 | `quay.io/iamenr0s/docker-ansible-ubuntu2004` | `docker.io/iamenr0s/docker-ansible-ubuntu2004` | Ansible test environment |
-| docker-debian-devel | `quay.io/iamenr0s/docker-debian-devel` | `docker.io/iamenr0s/docker-debian-devel` | Debian dev toolchain |
-| github-action-molecule | `quay.io/iamenr0s/github-action-molecule` | `docker.io/iamenr0s/github-action-molecule` | Fedora 41 + Molecule |
-| kibana | `quay.io/iamenr0s/kibana` | `docker.io/iamenr0s/kibana` | Kibana 9.3.2 (AlmaLinux 9) |
-| motioneye | `quay.io/iamenr0s/motioneye` | `docker.io/iamenr0s/motioneye` | MotionEye on Debian bookworm-slim |
-| packer-build-qemu | `quay.io/iamenr0s/packer-build-qemu` | `docker.io/iamenr0s/packer-build-qemu` | Packer + QEMU (Alpine 3.21) |
-| posta | `quay.io/iamenr0s/posta` | `docker.io/iamenr0s/posta` | Self-hosted email platform (built from source) |
-| ubi-quarkus-native-image | `quay.io/iamenr0s/ubi-quarkus-native-image` | `docker.io/iamenr0s/ubi-quarkus-native-image` | GraalVM native image builder |
+| baseimage | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fbaseimage-blue?logo=redhat)](https://quay.io/repository/iamenr0s/baseimage) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/baseimage?logo=docker)](https://hub.docker.com/r/iamenr0s/baseimage) | Debian bookworm-slim base with runit, syslog-ng, sshd, cron |
+| csi-external-attacher | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fcsi--external--attacher-blue?logo=redhat)](https://quay.io/repository/iamenr0s/csi-external-attacher) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/csi-external-attacher?logo=docker)](https://hub.docker.com/r/iamenr0s/csi-external-attacher) | Kubernetes CSI sidecar |
+| csi-external-provisioner | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fcsi--external--provisioner-blue?logo=redhat)](https://quay.io/repository/iamenr0s/csi-external-provisioner) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/csi-external-provisioner?logo=docker)](https://hub.docker.com/r/iamenr0s/csi-external-provisioner) | Kubernetes CSI sidecar |
+| csi-node-driver-registrar | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fcsi--node--driver--registrar-blue?logo=redhat)](https://quay.io/repository/iamenr0s/csi-node-driver-registrar) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/csi-node-driver-registrar?logo=docker)](https://hub.docker.com/r/iamenr0s/csi-node-driver-registrar) | Kubernetes CSI sidecar |
+| docker-ansible-ubuntu2004 | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fdocker--ansible--ubuntu2004-blue?logo=redhat)](https://quay.io/repository/iamenr0s/docker-ansible-ubuntu2004) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/docker-ansible-ubuntu2004?logo=docker)](https://hub.docker.com/r/iamenr0s/docker-ansible-ubuntu2004) | Ansible test environment |
+| docker-debian-devel | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fdocker--debian--devel-blue?logo=redhat)](https://quay.io/repository/iamenr0s/docker-debian-devel) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/docker-debian-devel?logo=docker)](https://hub.docker.com/r/iamenr0s/docker-debian-devel) | Debian dev toolchain |
+| github-action-molecule | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fgithub--action--molecule-blue?logo=redhat)](https://quay.io/repository/iamenr0s/github-action-molecule) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/github-action-molecule?logo=docker)](https://hub.docker.com/r/iamenr0s/github-action-molecule) | Fedora 41 + Molecule |
+| kibana | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fkibana-blue?logo=redhat)](https://quay.io/repository/iamenr0s/kibana) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/kibana?logo=docker)](https://hub.docker.com/r/iamenr0s/kibana) | Kibana 9.3.2 (AlmaLinux 9) |
+| motioneye | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fmotioneye-blue?logo=redhat)](https://quay.io/repository/iamenr0s/motioneye) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/motioneye?logo=docker)](https://hub.docker.com/r/iamenr0s/motioneye) | MotionEye on Debian bookworm-slim |
+| packer-build-qemu | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fpacker--build--qemu-blue?logo=redhat)](https://quay.io/repository/iamenr0s/packer-build-qemu) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/packer-build-qemu?logo=docker)](https://hub.docker.com/r/iamenr0s/packer-build-qemu) | Packer + QEMU (Alpine 3.21) |
+| posta | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fposta-blue?logo=redhat)](https://quay.io/repository/iamenr0s/posta) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/posta?logo=docker)](https://hub.docker.com/r/iamenr0s/posta) | Self-hosted email platform (built from source) |
+| ubi-quarkus-native-image | [![Quay](https://img.shields.io/badge/quay.io-iamenr0s%2Fubi--quarkus--native--image-blue?logo=redhat)](https://quay.io/repository/iamenr0s/ubi-quarkus-native-image) | [![Docker Pulls](https://img.shields.io/docker/pulls/iamenr0s/ubi-quarkus-native-image?logo=docker)](https://hub.docker.com/r/iamenr0s/ubi-quarkus-native-image) | GraalVM native image builder |
 
 ### Tags
 
