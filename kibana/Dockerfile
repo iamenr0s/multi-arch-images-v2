@@ -5,7 +5,7 @@ ARG NODEJS_VERSION=v25.6.1
 
 RUN yum install -y yum-utils && \
  yum-config-manager --enable crb && \
- yum install -y glibc-static gcc make curl tar gzip
+ yum install -y --allowerasing glibc-static gcc make curl tar gzip
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
