@@ -1,7 +1,7 @@
 FROM almalinux:9 AS prep_files
 
-ARG KIBANA_VERSION=7.17.28
-ARG NODEJS_VERSION=v20.18.1
+ARG KIBANA_VERSION=9.3.2
+ARG NODEJS_VERSION=v25.6.1
 
 RUN yum install -y glibc-static gcc make curl tar gzip
 
