@@ -3,7 +3,9 @@ FROM almalinux:9 AS prep_files
 ARG KIBANA_VERSION=9.3.2
 ARG NODEJS_VERSION=v25.6.1
 
-RUN yum install -y glibc-static gcc make curl tar gzip
+RUN yum install -y yum-utils && \
+ yum-config-manager --enable crb && \
+ yum install -y glibc-static gcc make curl tar gzip
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
