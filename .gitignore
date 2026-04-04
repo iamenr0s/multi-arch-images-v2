@@ -1,11 +1,8 @@
 # Claude / Anthropic AI files
 .claude/
 .anthropic/
-claude.md
-CLAUDE.md
 .claude.md
 anthropic.md
-*claude*
 .assistants/
 
 # IDE and editor files
