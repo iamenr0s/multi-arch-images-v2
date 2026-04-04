@@ -10,7 +10,7 @@ RUN yum install -y yum-utils && \
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 
-RUN curl -sL https://artifacts.elastic.co/downloads/kibana/kibana-oss-${KIBANA_VERSION}-linux-`uname -m`.tar.gz | tar --strip-components=1 -zxf -
+RUN curl -sL https://artifacts.elastic.co/downloads/kibana/kibana-${KIBANA_VERSION}-linux-`uname -m`.tar.gz | tar --strip-components=1 -zxf -
 RUN rm -rf /usr/share/kibana/node/* && \
  curl -sL https://nodejs.org/dist/${NODEJS_VERSION}/node-${NODEJS_VERSION}-linux-`uname -m|sed 's|x86_64|x64|'|sed 's|aarch64|arm64|'`.tar.gz | tar -C /usr/share/kibana/node/ --strip-components=1 -xzf -
 
