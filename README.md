@@ -1,4 +1,4 @@
-# multi-arch-images-v2
+# Multi Architecture Images v2
 
 Multi-architecture (amd64 + arm64) container images built with Podman and published to Quay.io and Docker Hub via GitHub Actions.
 
