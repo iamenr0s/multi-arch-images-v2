@@ -79,30 +79,20 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build amd64
+      # Sequential single-platform builds with --manifest hit a podman layer-cache
+      # bug on multi-stage Dockerfiles that pin `FROM --platform=$BUILDPLATFORM`:
+      # the second build reuses the first's runtime layers and only rewrites the
+      # config, producing an "arm64" image with amd64 content. Using a single
+      # comma-separated --platform invocation forces buildah to key caches per
+      # platform correctly.
+      - name: Build multi-arch image
         env:
           VERSION: ${{ steps.upstream.outputs.version }}
           COMMIT: ${{ steps.upstream.outputs.commit }}
           BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
         run: |
           podman build \
-            --platform linux/amd64 \
-            --manifest harbor-portal \
-            --build-arg "VERSION=${VERSION}" \
-            --build-arg "COMMIT=${COMMIT}" \
-            --build-arg "BUILD_DATE=${BUILD_DATE}" \
-            --build-arg "HARBOR_REF=${VERSION}" \
-            -f harbor-portal/Dockerfile \
-            harbor-portal/
-
-      - name: Build arm64
-        env:
-          VERSION: ${{ steps.upstream.outputs.version }}
-          COMMIT: ${{ steps.upstream.outputs.commit }}
-          BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
-        run: |
-          podman build \
-            --platform linux/arm64 \
+            --platform linux/amd64,linux/arm64 \
             --manifest harbor-portal \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
