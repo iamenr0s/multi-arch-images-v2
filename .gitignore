@@ -4,6 +4,7 @@
 .claude.md
 anthropic.md
 .assistants/
+.remember/
 
 # IDE and editor files
 .vscode/
