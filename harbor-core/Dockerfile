@@ -54,6 +54,10 @@ RUN set -eux; \
           -X github.com/goharbor/harbor/src/pkg/version.ReleaseVersion=${RELEASEVERSION}" \
         -o /out/harbor_core .
 
+# Generate make/photon/prepare/versions (gitignored upstream, produced by the
+# root Makefile's versions_prepare target).
+RUN make versions_prepare
+
 # Collect runtime assets in one place for a clean COPY --from=builder.
 RUN set -eux; \
     mkdir -p /out/assets; \
