@@ -79,27 +79,48 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Sequential single-platform builds with --manifest hit a podman layer-cache
-      # bug on multi-stage Dockerfiles that pin `FROM --platform=$BUILDPLATFORM`:
-      # the second build reuses the first's runtime layers and only rewrites the
-      # config, producing an "arm64" image with amd64 content. Using a single
-      # comma-separated --platform invocation forces buildah to key caches per
-      # platform correctly.
-      - name: Build multi-arch image
+      # Build each arch with its own local tag (not a shared --manifest). Sharing
+      # --manifest across two sequential multi-stage builds with a BUILDPLATFORM
+      # stage makes podman reuse the first build's runtime layers and ship an
+      # "arm64" image with amd64 content. Distinct per-arch tags avoid that.
+      - name: Build amd64
         env:
           VERSION: ${{ steps.upstream.outputs.version }}
           COMMIT: ${{ steps.upstream.outputs.commit }}
           BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
         run: |
           podman build \
-            --platform linux/amd64,linux/arm64 \
-            --manifest harbor-portal \
+            --platform linux/amd64 \
+            -t localhost/harbor-portal:amd64 \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
             --build-arg "BUILD_DATE=${BUILD_DATE}" \
             --build-arg "HARBOR_REF=${VERSION}" \
             -f harbor-portal/Dockerfile \
             harbor-portal/
+
+      - name: Build arm64
+        env:
+          VERSION: ${{ steps.upstream.outputs.version }}
+          COMMIT: ${{ steps.upstream.outputs.commit }}
+          BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
+        run: |
+          podman build \
+            --platform linux/arm64 \
+            -t localhost/harbor-portal:arm64 \
+            --build-arg "VERSION=${VERSION}" \
+            --build-arg "COMMIT=${COMMIT}" \
+            --build-arg "BUILD_DATE=${BUILD_DATE}" \
+            --build-arg "HARBOR_REF=${VERSION}" \
+            -f harbor-portal/Dockerfile \
+            harbor-portal/
+
+      - name: Assemble manifest
+        run: |
+          podman manifest create harbor-portal
+          podman manifest add harbor-portal containers-storage:localhost/harbor-portal:amd64
+          podman manifest add harbor-portal containers-storage:localhost/harbor-portal:arm64
+          podman manifest inspect harbor-portal
 
       - name: Push to Quay.io
         env:
