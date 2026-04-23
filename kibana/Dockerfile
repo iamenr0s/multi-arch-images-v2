@@ -1,4 +1,4 @@
-FROM almalinux:9 AS prep_files
+FROM almalinux:10 AS prep_files
 
 ARG KIBANA_VERSION=9.3.2
 ARG NODEJS_VERSION=v25.6.1
@@ -21,7 +21,7 @@ RUN cd /opt/dumb-init && make
 RUN chmod -R g=u /usr/share/kibana
 RUN find /usr/share/kibana -type d -exec chmod g+s {} \;
 
-FROM almalinux:9
+FROM almalinux:10
 EXPOSE 5601
 
 RUN yum update -y && yum install -y fontconfig freetype shadow-utils && yum clean all
