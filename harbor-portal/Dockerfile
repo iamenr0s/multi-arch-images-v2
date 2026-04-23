@@ -14,9 +14,9 @@ FROM --platform=$BUILDPLATFORM ${NODE_IMAGE} AS builder
 ARG HARBOR_REF
 ARG NPM_REGISTRY=https://registry.npmjs.org
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends git ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# The node:16.18.0 image is based on buildpack-deps:buster-scm, which already
+# ships git and ca-certificates. Buster's apt repos have been archived, so
+# running apt-get update would 404.
 
 WORKDIR /src
 RUN git clone --depth 1 --branch "${HARBOR_REF}" https://github.com/goharbor/harbor.git .
