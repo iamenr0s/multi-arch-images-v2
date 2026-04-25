@@ -33,19 +33,26 @@ LABEL org.opencontainers.image.title="harbor-db" \
 
 ENV PGDATA=/var/lib/postgresql/data
 
+# Mirrors upstream harbor-db-base layout exactly. Photon ships toybox by default,
+# which conflicts with util-linux/net-tools and must be removed first.
+# postgresql.conf.sample lives at /usr/pgsql/<major>/share/postgresql/ on Photon
+# (not the Debian-style /usr/share/postgresql/<major>/ path).
 RUN tdnf install -y shadow >> /dev/null \
-    && groupadd -r -g 999 postgres \
-    && useradd --no-log-init -r -g 999 -u 999 -d /var/lib/postgresql -s /sbin/nologin postgres \
-    && tdnf install -y postgresql14-server postgresql14 postgresql15-server postgresql15 \
-         gzip findutils bc util-linux net-tools >> /dev/null \
+    && groupadd -r postgres --gid=999 \
+    && useradd -m -r -g postgres --uid=999 postgres \
+    && tdnf install -y postgresql14-server >> /dev/null \
+    && tdnf install -y gzip postgresql15-server findutils bc >> /dev/null \
+    && mkdir -p /docker-entrypoint-initdb.d /run/postgresql "${PGDATA}" \
+    && chown -R postgres:postgres /run/postgresql "${PGDATA}" \
+    && chmod 2777 /run/postgresql \
+    && chmod 777 "${PGDATA}" \
+    && sed -i "s|#listen_addresses = 'localhost'.*|listen_addresses = '*'|g" \
+         /usr/pgsql/15/share/postgresql/postgresql.conf.sample \
+    && sed -i "s|#unix_socket_directories = '/tmp'.*|unix_socket_directories = '/run/postgresql'|g" \
+         /usr/pgsql/15/share/postgresql/postgresql.conf.sample \
     && tdnf clean all \
-    && mkdir -p /var/run/postgresql /var/lib/postgresql /docker-entrypoint-initdb.d "${PGDATA}" \
-    && chown -R postgres:postgres /var/run/postgresql /var/lib/postgresql /docker-entrypoint-initdb.d "${PGDATA}" \
-    && chmod 2777 /var/run/postgresql \
-    && sed -i "s|^#listen_addresses = 'localhost'|listen_addresses = '*'|" \
-         /usr/share/postgresql/15/postgresql.conf.sample \
-    && sed -i "s|^#unix_socket_directories = '/run/postgresql'|unix_socket_directories = '/run/postgresql'|" \
-         /usr/share/postgresql/15/postgresql.conf.sample
+    && tdnf erase -y toybox \
+    && tdnf install -y util-linux net-tools
 
 VOLUME /var/lib/postgresql/data
 
