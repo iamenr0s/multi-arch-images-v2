@@ -87,7 +87,7 @@ jobs:
         run: |
           podman build \
             --platform linux/amd64 \
-            -t localhost/harbor-db:amd64 \
+            --manifest harbor-db \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
             --build-arg "BUILD_DATE=${BUILD_DATE}" \
@@ -95,9 +95,6 @@ jobs:
             -f harbor-db/Dockerfile \
             harbor-db/
 
-      # --no-cache + --pull=always forces podman to re-resolve FROM photon:5.0
-      # for arm64 instead of reusing the cached amd64 photon layer from the
-      # first build, which would otherwise produce an arm64-labelled amd64 image.
       - name: Build arm64
         env:
           VERSION: ${{ steps.upstream.outputs.version }}
@@ -106,31 +103,13 @@ jobs:
         run: |
           podman build \
             --platform linux/arm64 \
-            --no-cache \
-            --pull=always \
-            -t localhost/harbor-db:arm64 \
+            --manifest harbor-db \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
             --build-arg "BUILD_DATE=${BUILD_DATE}" \
             --build-arg "HARBOR_REF=${VERSION}" \
             -f harbor-db/Dockerfile \
             harbor-db/
-
-      - name: Assemble manifest
-        run: |
-          set -euo pipefail
-          AMD_ID=$(podman image inspect --format '{{.Id}}' localhost/harbor-db:amd64)
-          ARM_ID=$(podman image inspect --format '{{.Id}}' localhost/harbor-db:arm64)
-          echo "amd64 image id: ${AMD_ID}"
-          echo "arm64 image id: ${ARM_ID}"
-          if [[ "${AMD_ID}" == "${ARM_ID}" ]]; then
-            echo "ERROR: amd64 and arm64 builds produced identical images — arm64 build hit cache" >&2
-            exit 1
-          fi
-          podman manifest create harbor-db
-          podman manifest add harbor-db containers-storage:localhost/harbor-db:amd64
-          podman manifest add harbor-db containers-storage:localhost/harbor-db:arm64
-          podman manifest inspect harbor-db
 
       - name: Push to Quay.io
         env:

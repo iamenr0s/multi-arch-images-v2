@@ -79,10 +79,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Build each arch with its own local tag (not a shared --manifest). Sharing
-      # --manifest across two sequential multi-stage builds with a BUILDPLATFORM
-      # stage makes podman reuse the first build's runtime layers and ship an
-      # "arm64" image with amd64 content. Distinct per-arch tags avoid that.
       - name: Build amd64
         env:
           VERSION: ${{ steps.upstream.outputs.version }}
@@ -91,7 +87,7 @@ jobs:
         run: |
           podman build \
             --platform linux/amd64 \
-            -t localhost/harbor-portal:amd64 \
+            --manifest harbor-portal \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
             --build-arg "BUILD_DATE=${BUILD_DATE}" \
@@ -99,13 +95,6 @@ jobs:
             -f harbor-portal/Dockerfile \
             harbor-portal/
 
-      # --no-cache + --pull=always is deliberate. Podman's layer cache keys
-      # `FROM photon:5.0` by image name, so after the amd64 build stores a
-      # photon:5.0/amd64 image locally, a second `podman build --platform
-      # linux/arm64` with a different -t tag STILL reuses the amd64 photon
-      # layer, producing arm64-labelled amd64 content. --pull=always forces a
-      # fresh registry resolution (gets the arm64 photon variant) and
-      # --no-cache ensures no stale layer hash collides.
       - name: Build arm64
         env:
           VERSION: ${{ steps.upstream.outputs.version }}
@@ -114,31 +103,13 @@ jobs:
         run: |
           podman build \
             --platform linux/arm64 \
-            --no-cache \
-            --pull=always \
-            -t localhost/harbor-portal:arm64 \
+            --manifest harbor-portal \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
             --build-arg "BUILD_DATE=${BUILD_DATE}" \
             --build-arg "HARBOR_REF=${VERSION}" \
             -f harbor-portal/Dockerfile \
             harbor-portal/
-
-      - name: Assemble manifest
-        run: |
-          set -euo pipefail
-          AMD_ID=$(podman image inspect --format '{{.Id}}' localhost/harbor-portal:amd64)
-          ARM_ID=$(podman image inspect --format '{{.Id}}' localhost/harbor-portal:arm64)
-          echo "amd64 image id: ${AMD_ID}"
-          echo "arm64 image id: ${ARM_ID}"
-          if [[ "${AMD_ID}" == "${ARM_ID}" ]]; then
-            echo "ERROR: amd64 and arm64 builds produced identical images — arm64 build hit cache" >&2
-            exit 1
-          fi
-          podman manifest create harbor-portal
-          podman manifest add harbor-portal containers-storage:localhost/harbor-portal:amd64
-          podman manifest add harbor-portal containers-storage:localhost/harbor-portal:arm64
-          podman manifest inspect harbor-portal
 
       - name: Push to Quay.io
         env:

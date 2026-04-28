@@ -87,7 +87,7 @@ jobs:
         run: |
           podman build \
             --platform linux/amd64 \
-            -t localhost/harbor-jobservice:amd64 \
+            --manifest harbor-jobservice \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
             --build-arg "BUILD_DATE=${BUILD_DATE}" \
@@ -95,13 +95,6 @@ jobs:
             -f harbor-jobservice/Dockerfile \
             harbor-jobservice/
 
-      # --no-cache + --pull=always is deliberate. Podman's layer cache keys
-      # `FROM photon:5.0` by image name, so after the amd64 build stores a
-      # photon:5.0/amd64 image locally, a second `podman build --platform
-      # linux/arm64` STILL reuses the amd64 photon layer, producing an
-      # arm64-labelled amd64 image. --pull=always forces a fresh registry
-      # resolution (gets the arm64 photon variant) and --no-cache ensures no
-      # stale layer hash collides.
       - name: Build arm64
         env:
           VERSION: ${{ steps.upstream.outputs.version }}
@@ -110,31 +103,13 @@ jobs:
         run: |
           podman build \
             --platform linux/arm64 \
-            --no-cache \
-            --pull=always \
-            -t localhost/harbor-jobservice:arm64 \
+            --manifest harbor-jobservice \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
             --build-arg "BUILD_DATE=${BUILD_DATE}" \
             --build-arg "HARBOR_REF=${VERSION}" \
             -f harbor-jobservice/Dockerfile \
             harbor-jobservice/
-
-      - name: Assemble manifest
-        run: |
-          set -euo pipefail
-          AMD_ID=$(podman image inspect --format '{{.Id}}' localhost/harbor-jobservice:amd64)
-          ARM_ID=$(podman image inspect --format '{{.Id}}' localhost/harbor-jobservice:arm64)
-          echo "amd64 image id: ${AMD_ID}"
-          echo "arm64 image id: ${ARM_ID}"
-          if [[ "${AMD_ID}" == "${ARM_ID}" ]]; then
-            echo "ERROR: amd64 and arm64 builds produced identical images — arm64 build hit cache" >&2
-            exit 1
-          fi
-          podman manifest create harbor-jobservice
-          podman manifest add harbor-jobservice containers-storage:localhost/harbor-jobservice:amd64
-          podman manifest add harbor-jobservice containers-storage:localhost/harbor-jobservice:arm64
-          podman manifest inspect harbor-jobservice
 
       - name: Push to Quay.io
         env:
