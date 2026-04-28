@@ -38,8 +38,8 @@ RUN tdnf install -y shadow >> /dev/null \
 VOLUME /var/lib/redis
 WORKDIR /var/lib/redis
 
-COPY --from=fetcher /src/make/photon/redis/docker-healthcheck  /usr/bin/docker-healthcheck
-COPY --from=fetcher /src/make/photon/redis/redis.conf          /etc/redis.conf
+COPY --from=fetcher /src/make/photon/valkey/docker-healthcheck  /usr/bin/docker-healthcheck
+COPY --from=fetcher /src/make/photon/valkey/redis.conf          /etc/redis.conf
 
 RUN chmod +x /usr/bin/docker-healthcheck \
     && chown redis:redis /etc/redis.conf
