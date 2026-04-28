@@ -17,7 +17,7 @@ RUN git clone --depth 1 --branch "${HARBOR_REF}" https://github.com/goharbor/har
 # Stage 2: runtime — photon:5.0 with Postgres 14 *and* 15 installed. Harbor's
 # upgrade.sh uses both to migrate data across major versions on first boot.
 #
-FROM --platform=$TARGETPLATFORM photon:5.0
+FROM photon:5.0
 
 ARG VERSION=dev
 ARG COMMIT=unknown

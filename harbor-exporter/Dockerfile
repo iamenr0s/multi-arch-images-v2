@@ -40,7 +40,7 @@ RUN set -eux; \
 #
 # Stage 2: runtime — photon:5.0, mirroring upstream harbor-exporter-base.
 #
-FROM --platform=$TARGETPLATFORM photon:5.0
+FROM photon:5.0
 
 ARG VERSION=dev
 ARG COMMIT=unknown

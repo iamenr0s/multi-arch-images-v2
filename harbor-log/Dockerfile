@@ -16,7 +16,7 @@ RUN git clone --depth 1 --branch "${HARBOR_REF}" https://github.com/goharbor/har
 # Stage 2: runtime — photon:5.0 with cronie + rsyslog + logrotate. This
 # container aggregates logs from the other Harbor components.
 #
-FROM --platform=$TARGETPLATFORM photon:5.0
+FROM photon:5.0
 
 ARG VERSION=dev
 ARG COMMIT=unknown

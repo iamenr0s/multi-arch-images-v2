@@ -58,7 +58,7 @@ RUN set -eux; \
 # Stage 2: runtime — photon:5.0 + scanner user (UID/GID 10000), mirroring
 # upstream harbor-trivy-adapter-base (note: user is "scanner", not "harbor").
 #
-FROM --platform=$TARGETPLATFORM photon:5.0
+FROM photon:5.0
 
 ARG VERSION=dev
 ARG COMMIT=unknown

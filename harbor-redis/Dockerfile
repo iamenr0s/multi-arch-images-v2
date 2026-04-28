@@ -15,7 +15,7 @@ RUN git clone --depth 1 --branch "${HARBOR_REF}" https://github.com/goharbor/har
 #
 # Stage 2: runtime — photon:5.0 + redis from tdnf.
 #
-FROM --platform=$TARGETPLATFORM photon:5.0
+FROM photon:5.0
 
 ARG VERSION=dev
 ARG COMMIT=unknown

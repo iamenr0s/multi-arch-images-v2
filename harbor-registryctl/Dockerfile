@@ -56,7 +56,7 @@ RUN set -eux; \
 # Stage 2: runtime — photon:5.0 + harbor user, mirroring upstream
 # harbor-registryctl-base (note: this one lives at /home/harbor, not /harbor).
 #
-FROM --platform=$TARGETPLATFORM photon:5.0
+FROM photon:5.0
 
 ARG VERSION=dev
 ARG COMMIT=unknown

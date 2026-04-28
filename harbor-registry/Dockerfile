@@ -53,11 +53,7 @@ RUN set -eux; \
 #
 # Stage 2: runtime — photon:5.0, mirroring upstream harbor-registry-base layout.
 #
-# Explicit --platform=$TARGETPLATFORM: without it, podman keys the FROM layer by
-# image name only and serves the amd64 photon from cache during the arm64 build,
-# producing an arm64-labelled image with amd64 content.
-#
-FROM --platform=$TARGETPLATFORM photon:5.0
+FROM photon:5.0
 
 ARG VERSION=dev
 ARG COMMIT=unknown
