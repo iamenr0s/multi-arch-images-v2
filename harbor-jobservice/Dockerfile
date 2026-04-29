@@ -5,7 +5,7 @@ ARG HARBOR_REF=v2.15.0
 #
 # Stage 1: builder — cross-compile harbor_jobservice on the build host's native arch.
 #
-FROM --platform=$BUILDPLATFORM golang:1.25.7 AS builder
+FROM golang:1.25.7 AS builder
 
 ARG HARBOR_REF
 ARG TARGETOS

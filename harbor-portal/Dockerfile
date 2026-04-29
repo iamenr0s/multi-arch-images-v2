@@ -9,7 +9,7 @@ ARG NODE_IMAGE=node:16.18.0
 # Pure-JS output is arch-agnostic, so pin the builder to BUILDPLATFORM regardless
 # of the final image's target arch.
 #
-FROM --platform=$BUILDPLATFORM ${NODE_IMAGE} AS builder
+FROM ${NODE_IMAGE} AS builder
 
 ARG HARBOR_REF
 ARG NPM_REGISTRY=https://registry.npmjs.org

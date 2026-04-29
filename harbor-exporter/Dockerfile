@@ -7,7 +7,7 @@ ARG HARBOR_REF=v2.15.0
 # Upstream's Dockerfile hardcodes GOARCH=amd64; we override via TARGETARCH for
 # multi-arch support.
 #
-FROM --platform=$BUILDPLATFORM golang:1.25.7 AS builder
+FROM golang:1.25.7 AS builder
 
 ARG HARBOR_REF
 ARG TARGETOS
