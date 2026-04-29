@@ -5,7 +5,7 @@ ARG HARBOR_REF=v2.15.0
 #
 # Stage 1: fetch — clone Harbor to pull the redis config and healthcheck script.
 #
-FROM --platform=$BUILDPLATFORM docker.io/library/alpine:3.20 AS fetcher
+FROM docker.io/library/alpine:3.20 AS fetcher
 
 ARG HARBOR_REF
 
