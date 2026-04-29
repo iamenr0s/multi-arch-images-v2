@@ -85,10 +85,10 @@ jobs:
           COMMIT: ${{ steps.upstream.outputs.commit }}
           BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
         run: |
-          # Pre-pull base images explicitly for amd64 — podman build --pull=always
-          # does not reliably honor --platform when refreshing already-cached tags.
-          podman pull --platform=linux/amd64 docker.io/library/alpine:3.20
-          podman pull --platform=linux/amd64 docker.io/library/photon:5.0
+          # Pre-pull using short names matching the Dockerfile FROM lines so
+          # --pull=never can resolve them without a short-name alias lookup.
+          podman pull --platform=linux/amd64 alpine:3.20
+          podman pull --platform=linux/amd64 photon:5.0
           podman build \
             --platform linux/amd64 \
             --pull=never \
@@ -105,7 +105,7 @@ jobs:
         run: |
           # Remove the amd64-tagged base images so the arm64 pre-pull below
           # gives us a clean tag pointing at the correct arch.
-          podman rmi -f docker.io/library/photon:5.0 docker.io/library/alpine:3.20 photon:5.0 alpine:3.20 2>/dev/null || true
+          podman rmi -f photon:5.0 alpine:3.20 2>/dev/null || true
 
       - name: Build arm64
         env:
@@ -113,8 +113,8 @@ jobs:
           COMMIT: ${{ steps.upstream.outputs.commit }}
           BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
         run: |
-          podman pull --platform=linux/arm64 docker.io/library/alpine:3.20
-          podman pull --platform=linux/arm64 docker.io/library/photon:5.0
+          podman pull --platform=linux/arm64 alpine:3.20
+          podman pull --platform=linux/arm64 photon:5.0
           podman build \
             --platform linux/arm64 \
             --pull=never \
