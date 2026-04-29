@@ -5,7 +5,7 @@ ARG HARBOR_REF=v2.15.0
 #
 # Stage 1: fetch — clone Harbor to pull the redis config and healthcheck script.
 #
-FROM --platform=$BUILDPLATFORM alpine:3.20 AS fetcher
+FROM --platform=$BUILDPLATFORM docker.io/library/alpine:3.20 AS fetcher
 
 ARG HARBOR_REF
 
@@ -15,7 +15,7 @@ RUN git clone --depth 1 --branch "${HARBOR_REF}" https://github.com/goharbor/har
 #
 # Stage 2: runtime — photon:5.0 + redis from tdnf.
 #
-FROM photon:5.0
+FROM docker.io/library/photon:5.0
 
 ARG VERSION=dev
 ARG COMMIT=unknown
