@@ -8,7 +8,7 @@ ARG TRIVY_VERSION=v0.69.3
 # Stage 1: builder — cross-compile scanner-trivy and download the Trivy binary
 # for the target arch.
 #
-FROM golang:1.25.7 AS builder
+FROM golang:1.26.2 AS builder
 
 ARG HARBOR_REF
 ARG TRIVY_ADAPTER_REF
