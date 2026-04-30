@@ -1,5 +1,5 @@
 # Stage 1: Clone upstream source
-FROM alpine:3.21 AS source
+FROM alpine:3.23 AS source
 ARG POSTA_REF=main
 RUN apk add --no-cache git
 RUN git clone --depth 1 --branch ${POSTA_REF} https://github.com/goposta/posta /app
@@ -30,7 +30,7 @@ RUN CGO_ENABLED=0 go build \
     -o /bin/posta ./cmd/posta
 
 # Stage 4: Runtime
-FROM alpine:3.21
+FROM alpine:3.23
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_DATE=unknown

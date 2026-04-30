@@ -6,7 +6,7 @@ ARG HARBOR_REF=v2.15.0
 # Stage 1: fetch — clone Harbor to pull the db/* scripts. No compilation needed,
 # so use a tiny image on BUILDPLATFORM.
 #
-FROM alpine:3.20 AS fetcher
+FROM alpine:3.23 AS fetcher
 
 ARG HARBOR_REF
 
