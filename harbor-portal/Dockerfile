@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.23
 
 ARG HARBOR_REF=v2.15.0
 # Pin to the upstream Makefile's NODEBUILDIMAGE for Angular build compatibility.

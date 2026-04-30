@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.23
 
 ARG HARBOR_REF=v2.15.0
 ARG REGISTRY_SRC_TAG=v2.8.3-harbor.1-rc.1

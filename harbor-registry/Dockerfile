@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.23
 
 ARG HARBOR_REF=v2.15.0
 # Harbor ships a forked distribution that adds Redis cache support. The tag is

@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.23
 
 ARG HARBOR_REF=v2.16.0
 ARG SWAGGER_VERSION=v0.33.1
