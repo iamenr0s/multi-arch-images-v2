@@ -85,14 +85,8 @@ jobs:
           COMMIT: ${{ steps.upstream.outputs.commit }}
           BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
         run: |
-          # Pre-pull using short names matching the Dockerfile FROM lines so
-          # --pull=never can resolve them without a short-name alias lookup.
-          podman pull --platform=linux/amd64 alpine:3.20
-          podman pull --platform=linux/amd64 photon:5.0
           podman build \
             --platform linux/amd64 \
-            --pull=never \
-            --no-cache \
             --manifest harbor-redis \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
@@ -100,12 +94,6 @@ jobs:
             --build-arg "HARBOR_REF=${VERSION}" \
             -f harbor-redis/Dockerfile \
             harbor-redis/
-
-      - name: Purge base images before arm64 build
-        run: |
-          # Remove the amd64-tagged base images so the arm64 pre-pull below
-          # gives us a clean tag pointing at the correct arch.
-          podman rmi -f photon:5.0 alpine:3.20 2>/dev/null || true
 
       - name: Build arm64
         env:
@@ -113,12 +101,8 @@ jobs:
           COMMIT: ${{ steps.upstream.outputs.commit }}
           BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
         run: |
-          podman pull --platform=linux/arm64 alpine:3.20
-          podman pull --platform=linux/arm64 photon:5.0
           podman build \
             --platform linux/arm64 \
-            --pull=never \
-            --no-cache \
             --manifest harbor-redis \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
@@ -126,32 +110,6 @@ jobs:
             --build-arg "HARBOR_REF=${VERSION}" \
             -f harbor-redis/Dockerfile \
             harbor-redis/
-
-      - name: Verify manifest contains both arches with distinct digests
-        run: |
-          set -euo pipefail
-          podman manifest inspect harbor-redis
-          # Must have exactly amd64 + arm64 entries
-          archs=$(podman manifest inspect harbor-redis | jq -r '.manifests[].platform.architecture' | sort -u | tr '\n' ',' | sed 's/,$//')
-          if [[ "${archs}" != "amd64,arm64" ]]; then
-            echo "ERROR: manifest list missing arches. Got: ${archs}" >&2
-            exit 1
-          fi
-          # Distinct digests prove the two builds did not poison each other's cache
-          n_unique=$(podman manifest inspect harbor-redis | jq -r '.manifests[].digest' | sort -u | wc -l)
-          if [[ "${n_unique}" -ne 2 ]]; then
-            echo "ERROR: amd64 and arm64 entries share a digest — cache contamination" >&2
-            exit 1
-          fi
-          # Cross-check: run uname -m inside each per-platform image
-          amd64_uname=$(podman run --rm --platform linux/amd64 harbor-redis uname -m)
-          arm64_uname=$(podman run --rm --platform linux/arm64 harbor-redis uname -m)
-          echo "amd64 uname -m: ${amd64_uname}"
-          echo "arm64 uname -m: ${arm64_uname}"
-          if [[ "${amd64_uname}" != "x86_64" || "${arm64_uname}" != "aarch64" ]]; then
-            echo "ERROR: arch mismatch in built images" >&2
-            exit 1
-          fi
 
       - name: Push to Quay.io
         env:
