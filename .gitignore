@@ -1,0 +1,43 @@
+# Claude / Anthropic AI files
+.claude/
+.anthropic/
+.claude.md
+anthropic.md
+.assistants/
+.remember/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python (common for AI/ML projects)
+__pycache__/
+*.py[cod]
+*.so
+.Python
+env/
+venv/
+.env
+.venv
+*.egg-info/
+dist/
+build/
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+*.db
+
+# OS files
+Thumbs.db
+.desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

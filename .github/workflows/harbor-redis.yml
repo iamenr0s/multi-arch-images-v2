@@ -1,0 +1,172 @@
+name: Build and Push harbor-redis
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'harbor-redis/**'
+      - '.github/workflows/harbor-redis.yml'
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    name: Build multi-arch image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Get upstream harbor version info
+        id: upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          LATEST_TAG=$(curl -sf -H "Authorization: Bearer ${GH_TOKEN}" \
+            https://api.github.com/repos/goharbor/harbor/releases/latest | jq -r '.tag_name // empty')
+          if [[ -z "${LATEST_TAG}" ]]; then
+            echo "ERROR: Could not determine upstream harbor version" >&2
+            exit 1
+          fi
+          TAG_OBJ=$(curl -sf -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/repos/goharbor/harbor/git/ref/tags/${LATEST_TAG}")
+          TAG_SHA=$(echo "${TAG_OBJ}" | jq -r '.object.sha')
+          TAG_TYPE=$(echo "${TAG_OBJ}" | jq -r '.object.type')
+          if [[ "${TAG_TYPE}" == "tag" ]]; then
+            LATEST_COMMIT=$(curl -sf -H "Authorization: Bearer ${GH_TOKEN}" \
+              "https://api.github.com/repos/goharbor/harbor/git/tags/${TAG_SHA}" \
+              | jq -r '.object.sha' | cut -c1-7)
+          else
+            LATEST_COMMIT=$(echo "${TAG_SHA}" | cut -c1-7)
+          fi
+          BUILD_DATE=$(date -u +%Y-%m-%d)
+          echo "version=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
+          echo "commit=${LATEST_COMMIT}" >> "$GITHUB_OUTPUT"
+          echo "build_date=${BUILD_DATE}" >> "$GITHUB_OUTPUT"
+
+      - name: Set short SHA tag
+        id: tags
+        env:
+          GITHUB_SHA_FULL: ${{ github.sha }}
+        run: |
+          SHORT_SHA=$(echo "${GITHUB_SHA_FULL}" | cut -c1-7)
+          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to Quay.io
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build amd64
+        env:
+          VERSION: ${{ steps.upstream.outputs.version }}
+          COMMIT: ${{ steps.upstream.outputs.commit }}
+          BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
+        run: |
+          # Pre-pull using short names matching the Dockerfile FROM lines so
+          # --pull=never can resolve them without a short-name alias lookup.
+          podman pull --platform=linux/amd64 alpine:3.20
+          podman pull --platform=linux/amd64 photon:5.0
+          podman build \
+            --platform linux/amd64 \
+            --pull=never \
+            --no-cache \
+            --manifest harbor-redis \
+            --build-arg "VERSION=${VERSION}" \
+            --build-arg "COMMIT=${COMMIT}" \
+            --build-arg "BUILD_DATE=${BUILD_DATE}" \
+            --build-arg "HARBOR_REF=${VERSION}" \
+            -f harbor-redis/Dockerfile \
+            harbor-redis/
+
+      - name: Purge base images before arm64 build
+        run: |
+          # Remove the amd64-tagged base images so the arm64 pre-pull below
+          # gives us a clean tag pointing at the correct arch.
+          podman rmi -f photon:5.0 alpine:3.20 2>/dev/null || true
+
+      - name: Build arm64
+        env:
+          VERSION: ${{ steps.upstream.outputs.version }}
+          COMMIT: ${{ steps.upstream.outputs.commit }}
+          BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
+        run: |
+          podman pull --platform=linux/arm64 alpine:3.20
+          podman pull --platform=linux/arm64 photon:5.0
+          podman build \
+            --platform linux/arm64 \
+            --pull=never \
+            --no-cache \
+            --manifest harbor-redis \
+            --build-arg "VERSION=${VERSION}" \
+            --build-arg "COMMIT=${COMMIT}" \
+            --build-arg "BUILD_DATE=${BUILD_DATE}" \
+            --build-arg "HARBOR_REF=${VERSION}" \
+            -f harbor-redis/Dockerfile \
+            harbor-redis/
+
+      - name: Verify manifest contains both arches with distinct digests
+        run: |
+          set -euo pipefail
+          podman manifest inspect harbor-redis
+          # Must have exactly amd64 + arm64 entries
+          archs=$(podman manifest inspect harbor-redis | jq -r '.manifests[].platform.architecture' | sort -u | tr '\n' ',' | sed 's/,$//')
+          if [[ "${archs}" != "amd64,arm64" ]]; then
+            echo "ERROR: manifest list missing arches. Got: ${archs}" >&2
+            exit 1
+          fi
+          # Distinct digests prove the two builds did not poison each other's cache
+          n_unique=$(podman manifest inspect harbor-redis | jq -r '.manifests[].digest' | sort -u | wc -l)
+          if [[ "${n_unique}" -ne 2 ]]; then
+            echo "ERROR: amd64 and arm64 entries share a digest — cache contamination" >&2
+            exit 1
+          fi
+          # Cross-check: run uname -m inside each per-platform image
+          amd64_uname=$(podman run --rm --platform linux/amd64 harbor-redis uname -m)
+          arm64_uname=$(podman run --rm --platform linux/arm64 harbor-redis uname -m)
+          echo "amd64 uname -m: ${amd64_uname}"
+          echo "arm64 uname -m: ${arm64_uname}"
+          if [[ "${amd64_uname}" != "x86_64" || "${arm64_uname}" != "aarch64" ]]; then
+            echo "ERROR: arch mismatch in built images" >&2
+            exit 1
+          fi
+
+      - name: Push to Quay.io
+        env:
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
+        run: |
+          podman manifest push --all harbor-redis \
+            quay.io/iamenr0s/harbor-redis:latest
+          podman manifest push --all harbor-redis \
+            "quay.io/iamenr0s/harbor-redis:${SHORT_SHA}"
+
+      - name: Push to Docker Hub
+        env:
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
+        run: |
+          podman manifest push --all harbor-redis \
+            docker.io/iamenr0s/harbor-redis:latest
+          podman manifest push --all harbor-redis \
+            "docker.io/iamenr0s/harbor-redis:${SHORT_SHA}"
