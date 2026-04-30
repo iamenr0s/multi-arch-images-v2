@@ -1,4 +1,4 @@
-FROM php:8.3-apache-bookworm AS runtime_base
+FROM php:8.5-apache-bookworm AS runtime_base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
