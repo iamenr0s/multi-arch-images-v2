@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26-alpine AS builder
 ARG VERSION=v4.7.0
 ARG TARGETPLATFORM
 WORKDIR /go/src/github.com/kubernetes-csi/external-attacher/
