@@ -1,0 +1,83 @@
+name: Build and Push csi-node-driver-registrar
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'csi-node-driver-registrar/**'
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    name: Build multi-arch image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set short SHA tag
+        id: tags
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to Quay.io
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build amd64
+        run: |
+          podman build \
+            --platform linux/amd64 \
+            --manifest csi-node-driver-registrar \
+            -f csi-node-driver-registrar/Dockerfile \
+            csi-node-driver-registrar/
+
+      - name: Build arm64
+        run: |
+          podman build \
+            --platform linux/arm64 \
+            --manifest csi-node-driver-registrar \
+            -f csi-node-driver-registrar/Dockerfile \
+            csi-node-driver-registrar/
+
+      - name: Push to Quay.io
+        env:
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
+        run: |
+          podman manifest push --all csi-node-driver-registrar \
+            quay.io/iamenr0s/csi-node-driver-registrar:latest
+          podman manifest push --all csi-node-driver-registrar \
+            "quay.io/iamenr0s/csi-node-driver-registrar:${SHORT_SHA}"
+
+      - name: Push to Docker Hub
+        env:
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
+        run: |
+          podman manifest push --all csi-node-driver-registrar \
+            docker.io/iamenr0s/csi-node-driver-registrar:latest
+          podman manifest push --all csi-node-driver-registrar \
+            "docker.io/iamenr0s/csi-node-driver-registrar:${SHORT_SHA}"
