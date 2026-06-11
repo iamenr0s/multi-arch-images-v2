@@ -6,6 +6,7 @@ anthropic.md
 .assistants/
 .remember/
 CLAUDE.md
+graphify-out
 
 # IDE and editor files
 .vscode/
