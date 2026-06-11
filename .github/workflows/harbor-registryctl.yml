@@ -88,6 +88,7 @@ jobs:
           BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
         run: |
           podman build \
+            --cgroup-manager=cgroupfs \
             --platform linux/amd64 \
             --manifest harbor-registryctl \
             --build-arg "VERSION=${VERSION}" \
