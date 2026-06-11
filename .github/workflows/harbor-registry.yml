@@ -98,6 +98,13 @@ jobs:
             -f harbor-registry/Dockerfile \
             harbor-registry/
 
+      - name: Re-register QEMU binfmt handlers
+        # The arm64 build below runs a ~5min emulated Go cross-compile before
+        # reaching the photon:5.0 runtime stage. Long emulated builds can drop
+        # the binfmt_misc registration mid-job, causing the runtime stage's
+        # RUN steps to fail with "executable file not found in $PATH".
+        run: docker run --privileged --rm tonistiigi/binfmt --install arm64
+
       - name: Build arm64
         env:
           VERSION: ${{ steps.upstream.outputs.version }}
