@@ -98,11 +98,28 @@ jobs:
             -f harbor-registryctl/Dockerfile \
             harbor-registryctl/
 
+      - name: Build arm64 (builder stage)
+        # This stage cross-compiles both harbor_registryctl and the bundled
+        # registry binary, taking long enough under QEMU emulation that the
+        # binfmt_misc registration can drop before the photon:5.0 runtime
+        # stage runs. Build and cache this stage first, then re-register
+        # binfmt immediately before the runtime stage's RUN steps execute.
+        env:
+          VERSION: ${{ steps.upstream.outputs.version }}
+          COMMIT: ${{ steps.upstream.outputs.commit }}
+          BUILD_DATE: ${{ steps.upstream.outputs.build_date }}
+        run: |
+          podman build \
+            --platform linux/arm64 \
+            --target builder \
+            --build-arg "VERSION=${VERSION}" \
+            --build-arg "COMMIT=${COMMIT}" \
+            --build-arg "BUILD_DATE=${BUILD_DATE}" \
+            --build-arg "HARBOR_REF=${VERSION}" \
+            -f harbor-registryctl/Dockerfile \
+            harbor-registryctl/
+
       - name: Re-register QEMU binfmt handlers
-        # The arm64 build below runs a ~5min emulated Go cross-compile before
-        # reaching the photon:5.0 runtime stage. Long emulated builds can drop
-        # the binfmt_misc registration mid-job, causing the runtime stage's
-        # RUN steps to fail with "executable file not found in $PATH".
         run: docker run --privileged --rm tonistiigi/binfmt --install arm64
 
       - name: Build arm64
