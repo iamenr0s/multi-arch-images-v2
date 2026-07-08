@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26-alpine AS builder
 ARG VERSION=v5.1.0
 ARG TARGETPLATFORM
 WORKDIR /go/src/github.com/kubernetes-csi/external-provisioner/
