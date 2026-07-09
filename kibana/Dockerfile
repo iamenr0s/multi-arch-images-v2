@@ -10,12 +10,29 @@ RUN yum install -y yum-utils && \
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 
-RUN curl -sL https://artifacts.elastic.co/downloads/kibana/kibana-${KIBANA_VERSION}-linux-`uname -m`.tar.gz | tar --strip-components=1 -zxf -
-RUN rm -rf /usr/share/kibana/node/* && \
- curl -sL https://nodejs.org/dist/${NODEJS_VERSION}/node-${NODEJS_VERSION}-linux-`uname -m|sed 's|x86_64|x64|'|sed 's|aarch64|arm64|'`.tar.gz | tar -C /usr/share/kibana/node/ --strip-components=1 -xzf -
+RUN set -eux; \
+ KIBANA_TARBALL="kibana-${KIBANA_VERSION}-linux-$(uname -m).tar.gz"; \
+ curl -sfL --retry 3 -o "/tmp/${KIBANA_TARBALL}" "https://artifacts.elastic.co/downloads/kibana/${KIBANA_TARBALL}"; \
+ curl -sfL --retry 3 "https://artifacts.elastic.co/downloads/kibana/${KIBANA_TARBALL}.sha512" | (cd /tmp && sha512sum -c -); \
+ tar --strip-components=1 -zxf "/tmp/${KIBANA_TARBALL}"; \
+ rm -f "/tmp/${KIBANA_TARBALL}"
+RUN set -eux; \
+ NODE_ARCH=$(uname -m | sed 's|x86_64|x64|' | sed 's|aarch64|arm64|'); \
+ NODE_TARBALL="node-${NODEJS_VERSION}-linux-${NODE_ARCH}.tar.gz"; \
+ curl -sfL --retry 3 -o "/tmp/${NODE_TARBALL}" "https://nodejs.org/dist/${NODEJS_VERSION}/${NODE_TARBALL}"; \
+ curl -sfL --retry 3 "https://nodejs.org/dist/${NODEJS_VERSION}/SHASUMS256.txt" | grep " ${NODE_TARBALL}$" | (cd /tmp && sha256sum -c -); \
+ rm -rf /usr/share/kibana/node/*; \
+ tar -C /usr/share/kibana/node/ --strip-components=1 -xzf "/tmp/${NODE_TARBALL}"; \
+ rm -f "/tmp/${NODE_TARBALL}"
 
+# Checksum of the v1.2.5 tag archive; recompute when bumping the version.
+ARG DUMB_INIT_SHA256=28ef31387b6324494175ec0bd01767470ff01e454ef610e1360cc774f87f5f62
 RUN mkdir -p /opt/dumb-init
-RUN curl -sL https://github.com/Yelp/dumb-init/archive/v1.2.5.tar.gz | tar -C /opt/dumb-init --strip-components=1 -zxf -
+RUN set -eux; \
+ curl -sfL --retry 3 -o /tmp/dumb-init.tar.gz https://github.com/Yelp/dumb-init/archive/v1.2.5.tar.gz; \
+ echo "${DUMB_INIT_SHA256}  /tmp/dumb-init.tar.gz" | sha256sum -c -; \
+ tar -C /opt/dumb-init --strip-components=1 -zxf /tmp/dumb-init.tar.gz; \
+ rm -f /tmp/dumb-init.tar.gz
 RUN cd /opt/dumb-init && make
 
 RUN chmod -R g=u /usr/share/kibana

@@ -19,9 +19,14 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Pinned to the same go-swagger version that upstream's Makefile uses (SWAGGER_VERSION).
-RUN curl -fsSL -o /usr/local/bin/swagger \
-      "https://github.com/go-swagger/go-swagger/releases/download/${SWAGGER_VERSION}/swagger_linux_${BUILDARCH}" \
-    && chmod +x /usr/local/bin/swagger
+RUN set -eux; \
+    curl -fsSL --retry 3 -o "/tmp/swagger_linux_${BUILDARCH}" \
+      "https://github.com/go-swagger/go-swagger/releases/download/${SWAGGER_VERSION}/swagger_linux_${BUILDARCH}"; \
+    curl -fsSL --retry 3 \
+      "https://github.com/go-swagger/go-swagger/releases/download/${SWAGGER_VERSION}/sha256sum.txt" \
+      | grep " swagger_linux_${BUILDARCH}$" | (cd /tmp && sha256sum -c -); \
+    mv "/tmp/swagger_linux_${BUILDARCH}" /usr/local/bin/swagger; \
+    chmod +x /usr/local/bin/swagger
 
 WORKDIR /src
 

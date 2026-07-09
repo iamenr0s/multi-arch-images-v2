@@ -11,6 +11,10 @@ on:
     - cron: '0 0 1 * *'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -35,7 +39,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          LATEST_TAG=$(curl -sf -H "Authorization: Bearer ${GH_TOKEN}" \
+          LATEST_TAG=$(curl -sf --retry 3 --retry-all-errors -H "Authorization: Bearer ${GH_TOKEN}" \
             "https://api.github.com/repos/goharbor/harbor/releases?per_page=100" \
             | jq -r '[.[] | select(.prerelease == false) | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name][]' \
             | sort -V | tail -1)
@@ -43,12 +47,12 @@ jobs:
             echo "ERROR: Could not determine upstream harbor version" >&2
             exit 1
           fi
-          TAG_OBJ=$(curl -sf -H "Authorization: Bearer ${GH_TOKEN}" \
+          TAG_OBJ=$(curl -sf --retry 3 --retry-all-errors -H "Authorization: Bearer ${GH_TOKEN}" \
             "https://api.github.com/repos/goharbor/harbor/git/ref/tags/${LATEST_TAG}")
           TAG_SHA=$(echo "${TAG_OBJ}" | jq -r '.object.sha')
           TAG_TYPE=$(echo "${TAG_OBJ}" | jq -r '.object.type')
           if [[ "${TAG_TYPE}" == "tag" ]]; then
-            LATEST_COMMIT=$(curl -sf -H "Authorization: Bearer ${GH_TOKEN}" \
+            LATEST_COMMIT=$(curl -sf --retry 3 --retry-all-errors -H "Authorization: Bearer ${GH_TOKEN}" \
               "https://api.github.com/repos/goharbor/harbor/git/tags/${TAG_SHA}" \
               | jq -r '.object.sha' | cut -c1-7)
           else
@@ -97,6 +101,12 @@ jobs:
             -f harbor-jobservice/Dockerfile \
             harbor-jobservice/
 
+      - name: Re-register QEMU binfmt handlers
+        # Long emulated builds can drop the binfmt_misc registration mid-job,
+        # causing later stages to fail with "executable file not found in
+        # $PATH". Re-register right before the arm64 build.
+        run: docker run --privileged --rm tonistiigi/binfmt --install arm64
+
       - name: Build arm64
         env:
           VERSION: ${{ steps.upstream.outputs.version }}
@@ -117,16 +127,18 @@ jobs:
         env:
           SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
         run: |
-          podman manifest push --all harbor-jobservice \
+          retry() { local i; for i in 1 2 3; do "$@" && return 0; [ "$i" -lt 3 ] && sleep $((15 * i)); done; return 1; }
+          retry podman manifest push --all harbor-jobservice \
             quay.io/iamenr0s/harbor-jobservice:latest
-          podman manifest push --all harbor-jobservice \
+          retry podman manifest push --all harbor-jobservice \
             "quay.io/iamenr0s/harbor-jobservice:${SHORT_SHA}"
 
       - name: Push to Docker Hub
         env:
           SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
         run: |
-          podman manifest push --all harbor-jobservice \
+          retry() { local i; for i in 1 2 3; do "$@" && return 0; [ "$i" -lt 3 ] && sleep $((15 * i)); done; return 1; }
+          retry podman manifest push --all harbor-jobservice \
             docker.io/iamenr0s/harbor-jobservice:latest
-          podman manifest push --all harbor-jobservice \
+          retry podman manifest push --all harbor-jobservice \
             "docker.io/iamenr0s/harbor-jobservice:${SHORT_SHA}"

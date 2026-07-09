@@ -10,6 +10,10 @@ on:
     - cron: '0 0 1 * *'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -68,16 +72,18 @@ jobs:
         env:
           SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
         run: |
-          podman manifest push --all baseimage \
+          retry() { local i; for i in 1 2 3; do "$@" && return 0; [ "$i" -lt 3 ] && sleep $((15 * i)); done; return 1; }
+          retry podman manifest push --all baseimage \
             quay.io/iamenr0s/baseimage:latest
-          podman manifest push --all baseimage \
+          retry podman manifest push --all baseimage \
             "quay.io/iamenr0s/baseimage:${SHORT_SHA}"
 
       - name: Push to Docker Hub
         env:
           SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
         run: |
-          podman manifest push --all baseimage \
+          retry() { local i; for i in 1 2 3; do "$@" && return 0; [ "$i" -lt 3 ] && sleep $((15 * i)); done; return 1; }
+          retry podman manifest push --all baseimage \
             docker.io/iamenr0s/baseimage:latest
-          podman manifest push --all baseimage \
+          retry podman manifest push --all baseimage \
             "docker.io/iamenr0s/baseimage:${SHORT_SHA}"

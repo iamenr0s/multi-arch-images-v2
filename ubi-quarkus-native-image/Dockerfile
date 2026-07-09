@@ -18,7 +18,9 @@ RUN groupadd -r quarkus -g 1001 && useradd -u 1001 -r -g 1001 -m -d /home/quarku
 RUN set -eux \
  && if [ "$TARGETPLATFORM" == "linux/amd64" ]; then GRAALVM_PKG=${GRAALVM_PKG/GRAALVM_ARCH/linux-amd64}; fi \
  && if [ "$TARGETPLATFORM" == "linux/arm64" ]; then GRAALVM_PKG=${GRAALVM_PKG/GRAALVM_ARCH/linux-aarch64}; fi \
- && curl --fail --silent --location --retry 3 ${GRAALVM_PKG} \
- | gunzip | tar x -C /opt/ && \
+ && curl --fail --silent --location --retry 3 -o /tmp/graalvm.tar.gz ${GRAALVM_PKG} \
+ && echo "$(curl --fail --silent --location --retry 3 ${GRAALVM_PKG}.sha256)  /tmp/graalvm.tar.gz" | sha256sum -c - \
+ && tar -xzf /tmp/graalvm.tar.gz -C /opt/ && \
+ rm -f /tmp/graalvm.tar.gz && \
  mv /opt/graalvm-ce-${JAVA_VERSION}-${GRAALVM_VERSION} /opt/graalvm && \
  /opt/graalvm/bin/gu --auto-yes install native-image

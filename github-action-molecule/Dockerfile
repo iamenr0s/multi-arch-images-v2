@@ -23,8 +23,11 @@ RUN useradd podman; \
 VOLUME /var/lib/containers
 VOLUME /home/podman/.local/share/containers
 
-ADD https://raw.githubusercontent.com/containers/image_build/main/podman/containers.conf /etc/containers/containers.conf
-ADD https://raw.githubusercontent.com/containers/image_build/main/podman/podman-containers.conf /home/podman/.config/containers/containers.conf
+# Pinned to a commit of containers/image_build main so builds are reproducible
+# and an upstream branch change can't silently alter the image.
+ARG IMAGE_BUILD_COMMIT=9555962772cb3d63d160affb1eeb3326e611f38a
+ADD https://raw.githubusercontent.com/containers/image_build/${IMAGE_BUILD_COMMIT}/podman/containers.conf /etc/containers/containers.conf
+ADD https://raw.githubusercontent.com/containers/image_build/${IMAGE_BUILD_COMMIT}/podman/podman-containers.conf /home/podman/.config/containers/containers.conf
 
 RUN chown podman:podman -R /home/podman; \
  chmod 644 /etc/containers/containers.conf; \

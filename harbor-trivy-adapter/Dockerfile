@@ -42,10 +42,14 @@ RUN set -eux; \
       *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
     esac; \
     TRIVY_VER_NOV="${TRIVY_VERSION#v}"; \
-    curl -fsSL -o /tmp/trivy.tar.gz \
-      "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VER_NOV}_${TRIVY_ASSET}.tar.gz"; \
+    TRIVY_TARBALL="trivy_${TRIVY_VER_NOV}_${TRIVY_ASSET}.tar.gz"; \
+    curl -fsSL --retry 3 -o "/tmp/${TRIVY_TARBALL}" \
+      "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/${TRIVY_TARBALL}"; \
+    curl -fsSL --retry 3 \
+      "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VER_NOV}_checksums.txt" \
+      | grep " ${TRIVY_TARBALL}$" | (cd /tmp && sha256sum -c -); \
     mkdir -p /tmp/trivy; \
-    tar -xzf /tmp/trivy.tar.gz -C /tmp/trivy; \
+    tar -xzf "/tmp/${TRIVY_TARBALL}" -C /tmp/trivy; \
     cp /tmp/trivy/trivy /out/trivy; \
     chmod +x /out/trivy
 
