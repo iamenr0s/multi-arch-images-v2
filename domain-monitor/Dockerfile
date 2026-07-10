@@ -1,4 +1,4 @@
-FROM php:8.5-apache-bookworm AS runtime_base
+FROM php:8.5-apache-bookworm@sha256:7c92a75e609956971bccafe13fd0b31451bbabe59b87ca112fa949ecdc2bc6ce AS runtime_base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 FROM runtime_base AS builder
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest@sha256:5946476338742b200bb9ff88f8be56275ddae4b3949c72305cb0dbf10cfcb760 /usr/bin/composer /usr/bin/composer
 
 RUN apt-get update && apt-get install -y --no-install-recommends git unzip \
     && rm -rf /var/lib/apt/lists/*

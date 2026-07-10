@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.25
+# syntax=docker/dockerfile:1.25@sha256:0adf442eae370b6087e08edc7c50b552d80ddf261576f4ebd6421006b2461f12
 
 ARG HARBOR_REF=v2.15.0
 # Harbor ships a forked distribution that adds Redis cache support. The tag is
@@ -9,7 +9,7 @@ ARG REGISTRY_SRC_TAG=v2.8.3-harbor.1-rc.1
 # Stage 1: builder — cross-compile the registry binary on the build host's
 # native arch.
 #
-FROM golang:1.26.5 AS builder
+FROM golang:1.26.5@sha256:079e59808d2d252516e27e3f3a9c003740dee7f75e55aa71528766d52bcfc16a AS builder
 
 ARG HARBOR_REF
 ARG REGISTRY_SRC_TAG
@@ -53,7 +53,7 @@ RUN set -eux; \
 #
 # Stage 2: runtime — photon:5.0, mirroring upstream harbor-registry-base layout.
 #
-FROM photon:5.0
+FROM photon:5.0@sha256:6db86de5ffc11d5c55e59d23790ad526b68e5bca4f030cb6a94e6136280866dd
 
 ARG VERSION=dev
 ARG COMMIT=unknown

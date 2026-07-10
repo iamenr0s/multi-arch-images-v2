@@ -1,4 +1,4 @@
-FROM photon:5.0
+FROM photon:5.0@sha256:6db86de5ffc11d5c55e59d23790ad526b68e5bca4f030cb6a94e6136280866dd
 
 ARG VERSION=dev
 ARG COMMIT=unknown
