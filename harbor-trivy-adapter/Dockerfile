@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.25
+# syntax=docker/dockerfile:1.25@sha256:0adf442eae370b6087e08edc7c50b552d80ddf261576f4ebd6421006b2461f12
 
 ARG HARBOR_REF=v2.15.0
 ARG TRIVY_ADAPTER_REF=v0.35.1
@@ -8,7 +8,7 @@ ARG TRIVY_VERSION=v0.69.3
 # Stage 1: builder — cross-compile scanner-trivy and download the Trivy binary
 # for the target arch.
 #
-FROM golang:1.26.5 AS builder
+FROM golang:1.26.5@sha256:079e59808d2d252516e27e3f3a9c003740dee7f75e55aa71528766d52bcfc16a AS builder
 
 ARG HARBOR_REF
 ARG TRIVY_ADAPTER_REF
@@ -62,7 +62,7 @@ RUN set -eux; \
 # Stage 2: runtime — photon:5.0 + scanner user (UID/GID 10000), mirroring
 # upstream harbor-trivy-adapter-base (note: user is "scanner", not "harbor").
 #
-FROM photon:5.0
+FROM photon:5.0@sha256:6db86de5ffc11d5c55e59d23790ad526b68e5bca4f030cb6a94e6136280866dd
 
 ARG VERSION=dev
 ARG COMMIT=unknown

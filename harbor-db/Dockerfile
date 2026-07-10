@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.25
+# syntax=docker/dockerfile:1.25@sha256:0adf442eae370b6087e08edc7c50b552d80ddf261576f4ebd6421006b2461f12
 
 ARG HARBOR_REF=v2.15.0
 
@@ -6,7 +6,7 @@ ARG HARBOR_REF=v2.15.0
 # Stage 1: fetch — clone Harbor to pull the db/* scripts. No compilation needed,
 # so use a tiny image on BUILDPLATFORM.
 #
-FROM alpine:3.24 AS fetcher
+FROM alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS fetcher
 
 ARG HARBOR_REF
 
@@ -17,7 +17,7 @@ RUN git clone --depth 1 --branch "${HARBOR_REF}" https://github.com/goharbor/har
 # Stage 2: runtime — photon:5.0 with Postgres 14 *and* 15 installed. Harbor's
 # upgrade.sh uses both to migrate data across major versions on first boot.
 #
-FROM photon:5.0
+FROM photon:5.0@sha256:6db86de5ffc11d5c55e59d23790ad526b68e5bca4f030cb6a94e6136280866dd
 
 ARG VERSION=dev
 ARG COMMIT=unknown

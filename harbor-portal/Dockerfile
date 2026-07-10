@@ -1,8 +1,8 @@
-# syntax=docker/dockerfile:1.25
+# syntax=docker/dockerfile:1.25@sha256:0adf442eae370b6087e08edc7c50b552d80ddf261576f4ebd6421006b2461f12
 
 ARG HARBOR_REF=v2.15.0
 # Pin to the upstream Makefile's NODEBUILDIMAGE for Angular build compatibility.
-ARG NODE_IMAGE=node:24.18.0
+ARG NODE_IMAGE=node:24.18.0@sha256:392e1e23f34da768d8d1f4e502b64f200d3be3465934d4b7930f57d7e2fc1989
 
 #
 # Stage 1: builder — Angular production build + swagger JSON + app-swagger-ui.
@@ -53,7 +53,7 @@ RUN cd app-swagger-ui && npm run build
 # Runtime nginx.conf is injected by Harbor's deploy-time prepare script; the base
 # image just carries nginx and the static assets.
 #
-FROM photon:5.0
+FROM photon:5.0@sha256:6db86de5ffc11d5c55e59d23790ad526b68e5bca4f030cb6a94e6136280866dd
 
 ARG VERSION=dev
 ARG COMMIT=unknown

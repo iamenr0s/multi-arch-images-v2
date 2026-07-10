@@ -1,11 +1,11 @@
 # Stage 1: Clone upstream source
-FROM alpine:3.24 AS source
+FROM alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS source
 ARG POSTA_REF=main
 RUN apk add --no-cache git
 RUN git clone --depth 1 --branch ${POSTA_REF} https://github.com/goposta/posta /app
 
 # Stage 2: Build UI
-FROM node:24-alpine AS ui-builder
+FROM node:24-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS ui-builder
 WORKDIR /app/web
 COPY --from=source /app/web/package.json /app/web/package-lock.json ./
 RUN npm ci
@@ -13,7 +13,7 @@ COPY --from=source /app/web/ .
 RUN npm run build
 
 # Stage 3: Build Go binary
-FROM golang:1.26-alpine AS builder
+FROM golang:1.26-alpine@sha256:0178a641fbb4858c5f1b48e34bdaabe0350a330a1b1149aabd498d0699ff5fb2 AS builder
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_DATE=unknown
@@ -30,7 +30,7 @@ RUN CGO_ENABLED=0 go build \
     -o /bin/posta ./cmd/posta
 
 # Stage 4: Runtime
-FROM alpine:3.24
+FROM alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_DATE=unknown
