@@ -109,6 +109,12 @@ jobs:
           dockle --exit-code 0 -f sarif -o dockle.sarif \
             --ignore CIS-DI-0001 --ignore CIS-DI-0008 \
             "scan/${{ matrix.app }}:ci"
+          # Dockle emits pseudo-locations like "ENVIRONMENT variable on HOST OS"
+          # that aren't valid URIs; Code Scanning rejects the whole SARIF.
+          # Rewrite anything that isn't a plain path to the Dockerfile.
+          jq --arg uri "${{ matrix.app }}/Dockerfile" \
+            '(.runs[]?.results[]?.locations[]?.physicalLocation.artifactLocation.uri) |= (if test("^[A-Za-z0-9._/-]+$") then . else $uri end)' \
+            dockle.sarif > dockle.fixed.sarif && mv dockle.fixed.sarif dockle.sarif
 
       - name: Upload hadolint SARIF
         uses: github/codeql-action/upload-sarif@v4

@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1.25
 
-ARG HARBOR_REF=v2.15.0
+# Must be >= v2.15.2: the valkey paths below don't exist in earlier tags.
+ARG HARBOR_REF=v2.15.2
 
 #
 # Stage 1: fetch — clone Harbor to pull the valkey config and healthcheck script.
