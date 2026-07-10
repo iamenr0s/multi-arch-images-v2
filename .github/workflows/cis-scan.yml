@@ -1,0 +1,132 @@
+---
+
+name: CIS compliance scan
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '*/Dockerfile'
+      - '.github/workflows/cis-scan.yml'
+  schedule:
+    - cron: '30 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    name: Scan ${{ matrix.app }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - baseimage
+          - csi-external-attacher
+          - csi-external-provisioner
+          - csi-node-driver-registrar
+          - docker-debian-devel
+          - domain-monitor
+          - github-action-molecule
+          - harbor-core
+          - harbor-db
+          - harbor-exporter
+          - harbor-jobservice
+          - harbor-log
+          - harbor-nginx-photon
+          - harbor-portal
+          - harbor-redis
+          - harbor-registry
+          - harbor-registryctl
+          - harbor-trivy-adapter
+          - kibana
+          - motioneye
+          - packer-build-qemu
+          - posta
+          - ubi-quarkus-native-image
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Lint Dockerfile (hadolint)
+        uses: hadolint/hadolint-action@v3.3.0
+        continue-on-error: true
+        with:
+          dockerfile: ${{ matrix.app }}/Dockerfile
+          format: sarif
+          output-file: hadolint.sarif
+          no-fail: true
+
+      - name: Build image
+        run: docker build -t scan/${{ matrix.app }}:ci -f ${{ matrix.app }}/Dockerfile ${{ matrix.app }}/
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: true
+        with:
+          image-ref: scan/${{ matrix.app }}:ci
+          format: sarif
+          output: trivy.sarif
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          # Only report CVEs the distro has actually fixed - a rebuild
+          # resolves them. Unfixed/EOL CVEs are visible in the compliance
+          # report step below but would drown code scanning.
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: Trivy CIS Docker Benchmark report
+        uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: true
+        with:
+          image-ref: scan/${{ matrix.app }}:ci
+          scan-type: image
+          exit-code: '0'
+        env:
+          TRIVY_COMPLIANCE: docker-cis-1.6.0
+
+      - name: Dockle image lint
+        continue-on-error: true
+        run: |
+          VERSION=$(curl -s --retry 3 https://api.github.com/repos/goodwithtech/dockle/releases/latest \
+            | jq -r '.tag_name' | tr -d v)
+          curl -sSfL --retry 3 -o dockle.deb \
+            "https://github.com/goodwithtech/dockle/releases/download/v${VERSION}/dockle_${VERSION}_Linux-64bit.deb"
+          sudo dpkg -i dockle.deb
+          # Ignored rules are accepted deviations documented in COMPLIANCE.md:
+          # some images (baseimage, github-action-molecule, motioneye) run as
+          # root by design (init systems, rootful podman-in-podman)
+          dockle --exit-code 0 -f sarif -o dockle.sarif \
+            --ignore CIS-DI-0001 --ignore CIS-DI-0008 \
+            "scan/${{ matrix.app }}:ci"
+
+      - name: Upload hadolint SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('hadolint.sarif') != ''
+        with:
+          sarif_file: hadolint.sarif
+          category: hadolint-${{ matrix.app }}
+
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy.sarif') != ''
+        with:
+          sarif_file: trivy.sarif
+          category: trivy-${{ matrix.app }}
+
+      - name: Upload Dockle SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('dockle.sarif') != ''
+        with:
+          sarif_file: dockle.sarif
+          category: dockle-${{ matrix.app }}

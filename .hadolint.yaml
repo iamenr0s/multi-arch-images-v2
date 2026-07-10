@@ -1,0 +1,9 @@
+---
+# Version pinning of distro packages is deliberately NOT used: every
+# monthly rebuild must pull the newest packages so published CVE fixes
+# land automatically (see COMPLIANCE.md). Upstream app versions ARE
+# pinned via build args and verified with checksums.
+ignored:
+  - DL3008  # pin apt package versions
+  - DL3013  # pin pip package versions
+  - DL3041  # pin dnf package versions

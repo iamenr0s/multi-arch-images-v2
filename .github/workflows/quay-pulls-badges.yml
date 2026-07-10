@@ -1,0 +1,46 @@
+---
+
+name: Quay pulls badges
+
+on:
+  schedule:
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  badges:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Quay only exposes ~3 months of daily pull stats (no all-time
+      # counter), so the badge shows pulls over that window.
+      - name: Generate badge JSON
+        run: |
+          mkdir -p badges
+          for dockerfile in */Dockerfile; do
+            app=${dockerfile%/Dockerfile}
+            pulls=$(curl -sf --retry 3 "https://quay.io/api/v1/repository/iamenr0s/${app}?includeStats=true" \
+              | jq '[.stats[].count] | add // 0') || continue
+            jq -n --argjson pulls "$pulls" \
+              '{schemaVersion: 1, label: "quay pulls/3mo", message: ($pulls | tostring), namedLogo: "redhat", color: "red"}' \
+              > "badges/quay-${app}.json"
+          done
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add badges
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update Quay pull badges"
+            git push
+          fi
