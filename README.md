@@ -4,6 +4,7 @@
 [![CIS compliance](https://img.shields.io/badge/CIS-compliance%20notes-blue)](COMPLIANCE.md)
 [![Security policy](https://img.shields.io/badge/security-policy-red)](SECURITY.md)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen?logo=renovate)](renovate.json)
+[![License](https://img.shields.io/github/license/iamenr0s/multi-arch-images-v2)](LICENSE)
 
 Multi-architecture (amd64 + arm64) container images built with Podman and published to Quay.io and Docker Hub via GitHub Actions.
 
