@@ -9,7 +9,7 @@ WORKDIR /github/workspace
 COPY requirements.txt .
 
 RUN dnf -y update; yum -y reinstall shadow-utils; \
- yum -y install podman fuse-overlayfs --exclude container-selinux; \
+ yum -y install podman fuse-overlayfs python3 --exclude container-selinux; \
  rm -rf /var/cache /var/log/dnf* /var/log/yum.*; \
  python3 -m venv /opt/venv; \
  /opt/venv/bin/python3 -m pip install --upgrade pip; \

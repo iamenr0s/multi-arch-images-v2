@@ -3,9 +3,7 @@ FROM almalinux:10 AS prep_files
 ARG KIBANA_VERSION=9.3.2
 ARG NODEJS_VERSION=v25.6.1
 
-RUN yum install -y yum-utils && \
- yum-config-manager --enable crb && \
- yum install -y --allowerasing glibc-static gcc make curl tar gzip
+RUN yum install -y --allowerasing curl tar gzip
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
@@ -25,15 +23,15 @@ RUN set -eux; \
  tar -C /usr/share/kibana/node/ --strip-components=1 -xzf "/tmp/${NODE_TARBALL}"; \
  rm -f "/tmp/${NODE_TARBALL}"
 
-# Checksum of the v1.2.5 tag archive; recompute when bumping the version.
-ARG DUMB_INIT_SHA256=28ef31387b6324494175ec0bd01767470ff01e454ef610e1360cc774f87f5f62
-RUN mkdir -p /opt/dumb-init
+# Official static release binary, verified against the published sha256sums.
+# (GitHub /archive/ tarballs are not byte-stable, so they can't be checksummed.)
+ARG DUMB_INIT_VERSION=1.2.5
 RUN set -eux; \
- curl -sfL --retry 3 -o /tmp/dumb-init.tar.gz https://github.com/Yelp/dumb-init/archive/v1.2.5.tar.gz; \
- echo "${DUMB_INIT_SHA256}  /tmp/dumb-init.tar.gz" | sha256sum -c -; \
- tar -C /opt/dumb-init --strip-components=1 -zxf /tmp/dumb-init.tar.gz; \
- rm -f /tmp/dumb-init.tar.gz
-RUN cd /opt/dumb-init && make
+ DUMB_INIT_BIN="dumb-init_${DUMB_INIT_VERSION}_$(uname -m)"; \
+ curl -sfL --retry 3 -o "/tmp/${DUMB_INIT_BIN}" "https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/${DUMB_INIT_BIN}"; \
+ curl -sfL --retry 3 "https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/sha256sums" | grep -F "*${DUMB_INIT_BIN}" | (cd /tmp && sha256sum -c -); \
+ install -m 0755 "/tmp/${DUMB_INIT_BIN}" /usr/local/bin/dumb-init; \
+ rm -f "/tmp/${DUMB_INIT_BIN}"
 
 RUN chmod -R g=u /usr/share/kibana
 RUN find /usr/share/kibana -type d -exec chmod g+s {} \;
@@ -44,7 +42,7 @@ EXPOSE 5601
 RUN yum update -y && yum install -y fontconfig freetype shadow-utils && yum clean all
 
 COPY --from=prep_files --chown=1000:0 /usr/share/kibana /usr/share/kibana
-COPY --from=prep_files --chown=1000:0 /opt/dumb-init/dumb-init /usr/local/bin/dumb-init
+COPY --from=prep_files --chown=1000:0 /usr/local/bin/dumb-init /usr/local/bin/dumb-init
 
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
