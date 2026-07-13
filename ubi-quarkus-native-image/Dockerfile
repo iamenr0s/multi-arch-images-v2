@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:latest@sha256:61e4f7716c700562f8e8882913a99677748918aa5a534929990d02c1bae10ca4
+FROM registry.access.redhat.com/ubi8/ubi-minimal:latest@sha256:578b238953144445a9b5bb2487eb1d95df4886f98d1f73c4a070b27535f51688
 
 ENV LANG "en_US.UTF-8"
 ENV LANGUAGE "en_US:en"
