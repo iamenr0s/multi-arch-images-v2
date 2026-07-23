@@ -68,3 +68,18 @@ Go to **Settings → Secrets and variables → Actions** and add:
 3. Replace all occurrences of `posta` with `<app>` in the workflow file.
 4. If the app clones upstream source, add a version-fetching step (see `posta.yml` for reference).
 5. Add the image to the table above.
+
+## Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the
+local pipeline commands and pull request checklist. This project follows the
+[Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+See [SECURITY.md](SECURITY.md) — GitHub private vulnerability reporting, no
+public issues for security bugs.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
