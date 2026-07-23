@@ -83,3 +83,7 @@ public issues for security bugs.
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+## Author Information
+
+Author: iamenr0s
