@@ -53,7 +53,7 @@ RUN set -eux; \
 #
 # Stage 2: runtime — photon:5.0, mirroring upstream harbor-registry-base layout.
 #
-FROM photon:5.0@sha256:6db86de5ffc11d5c55e59d23790ad526b68e5bca4f030cb6a94e6136280866dd
+FROM photon:5.0@sha256:ab4b68e15c8ff6b9c79ba525f696260f772c711761d576dd53bf43c351c9a504
 
 ARG VERSION=dev
 ARG COMMIT=unknown
