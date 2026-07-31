@@ -5,7 +5,7 @@ RUN apk add --no-cache git
 RUN git clone --depth 1 --branch ${POSTA_REF} https://github.com/goposta/posta /app
 
 # Stage 2: Build UI
-FROM node:24-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS ui-builder
+FROM node:24-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS ui-builder
 WORKDIR /app/web
 COPY --from=source /app/web/package.json /app/web/package-lock.json ./
 RUN npm ci
