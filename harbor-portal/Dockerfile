@@ -2,7 +2,7 @@
 
 ARG HARBOR_REF=v2.15.0
 # Pin to the upstream Makefile's NODEBUILDIMAGE for Angular build compatibility.
-ARG NODE_IMAGE=node:24.18.1@sha256:19cd848a0e073d34bd8cd5545a1b6b4d28489b3e3b607366621ced442bd5f6b4
+ARG NODE_IMAGE=node:24.19.0@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584
 
 #
 # Stage 1: builder — Angular production build + swagger JSON + app-swagger-ui.
