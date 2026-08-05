@@ -9,7 +9,7 @@ ARG REGISTRY_SRC_TAG=v2.8.3-harbor.1-rc.1
 # Stage 1: builder — cross-compile the registry binary on the build host's
 # native arch.
 #
-FROM golang:1.26.5@sha256:3aff6657219a4d9c14e27fb1d8976c49c29fddb70ba835014f477e1c70636647 AS builder
+FROM golang:1.26.5@sha256:2005724102f45917a63e9d092fc0e4ea56ea575048ce147caad5f5f61502c365 AS builder
 
 ARG HARBOR_REF
 ARG REGISTRY_SRC_TAG
