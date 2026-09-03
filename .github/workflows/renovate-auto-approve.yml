@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   auto-approve:
-    if: github.actor == 'renovate[bot]' || github.actor == 'github-actions[bot]'
+    if: github.event.pull_request.user.login == 'renovate[bot]' || github.event.pull_request.user.login == 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Approve PR
