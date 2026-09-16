@@ -1,0 +1,56 @@
+# Stage 1: Clone upstream source
+FROM alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS source
+ARG FARADAY_REF=main
+RUN apk add --no-cache git \
+    && git clone --depth 1 --branch ${FARADAY_REF} https://github.com/infobyte/faraday /app
+
+# Stage 2: Runtime
+FROM python:3.11-slim-bookworm@sha256:528257d48c1da0dcecc2e725d1ae34498d60c965f1241e39cd6a85a8859bdf84
+ARG VERSION=dev
+ARG COMMIT=unknown
+ARG BUILD_DATE=unknown
+LABEL org.opencontainers.image.title="faraday" \
+      org.opencontainers.image.description="Faraday is a collaborative penetration test and vulnerability management platform" \
+      org.opencontainers.image.licenses="GPL-3.0" \
+      org.opencontainers.image.source="https://github.com/infobyte/faraday" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.revision="${COMMIT}" \
+      org.opencontainers.image.created="${BUILD_DATE}"
+
+WORKDIR /src
+
+COPY --from=source /app/pyproject.toml /app/uv.lock ./
+COPY --from=source /app/docker/entrypoint.sh /entrypoint.sh
+COPY --from=source /app/docker/server.ini /docker_server.ini
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      curl ca-certificates python3-dev build-essential libgdk-pixbuf2.0-0 \
+      libpq-dev libsasl2-dev libldap2-dev libssl-dev libmagic1 redis-tools netcat-traditional \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* \
+    && chmod +x /entrypoint.sh
+
+COPY --from=ghcr.io/astral-sh/uv:0.12.15@sha256:62f8c047d0a0e9ece6b53fc63df902585a67a47a7f318ddec4a37db586edc8e3 /uv /usr/local/bin/uv
+
+RUN uv sync --frozen --no-dev --no-cache --no-editable --no-install-project
+
+COPY --from=source /app /src
+
+RUN uv sync --frozen --no-dev --no-cache --no-editable
+
+ENV PATH="/src/.venv/bin:$PATH"
+
+WORKDIR /home/faraday
+
+RUN mkdir -p \
+    /home/faraday/.faraday/config \
+    /home/faraday/.faraday/logs \
+    /home/faraday/.faraday/session \
+    /home/faraday/.faraday/storage
+
+ENV PYTHONUNBUFFERED=1
+ENV FARADAY_HOME=/home/faraday
+
+EXPOSE 5985
+
+ENTRYPOINT ["/entrypoint.sh"]
