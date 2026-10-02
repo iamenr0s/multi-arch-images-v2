@@ -50,6 +50,7 @@ jobs:
           - harbor-trivy-adapter
           - kibana
           - motioneye
+          - openvas-scanner
           - packer-build-qemu
           - posta
           - ubi-quarkus-native-image
