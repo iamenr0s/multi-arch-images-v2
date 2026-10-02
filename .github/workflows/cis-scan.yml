@@ -36,6 +36,7 @@ jobs:
           - csi-node-driver-registrar
           - docker-debian-devel
           - domain-monitor
+          - faraday
           - github-action-molecule
           - harbor-core
           - harbor-db
