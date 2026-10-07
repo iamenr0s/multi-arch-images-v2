@@ -1,7 +1,7 @@
 ARG VERSION=latest
 # this allows to override gvm-libs for e.g. smoketests
 ARG GVM_LIBS=ghcr.io/greenbone/gvm-libs
-ARG RUST_IMAGE=rust@sha256:15ad267e7a4cb2dce5905c90c76765adb6714945c5ea6d7c82673897a5e4067b
+ARG RUST_IMAGE=rust@sha256:6ff07edce8775d0f64be7aba9197229407301bddf2054d62c27b541a6238a181
 ARG OPENVAS_SMB_IMAGE=greenbone/openvas-smb@sha256:e96e0c5db6d619a4e6e240ba9a3f6186a2395faa7379ef1419dd3938f4bd16af
 ARG BUILD_IMAGE=${GVM_LIBS}:${VERSION}
 ARG FINAL_IMAGE=${GVM_LIBS}:${VERSION}
