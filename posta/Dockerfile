@@ -13,7 +13,7 @@ COPY --from=source /app/web/ .
 RUN npm run build
 
 # Stage 3: Build Go binary
-FROM golang:1.27-alpine@sha256:8a5910f31396cd4d89662f56c68b3ae31d374308270a1c3bd96672ee5ed43414 AS builder
+FROM golang:1.27-alpine@sha256:738d1cf061836894ff6bb8c33881080ac66de8cf0586615012a0c8f592649cfa AS builder
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_DATE=unknown
