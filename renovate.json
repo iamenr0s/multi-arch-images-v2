@@ -7,6 +7,13 @@
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["digest", "pin", "patch"],
       "automerge": true
+    },
+    {
+      "description": "faraday: hold python at 3.14 until lxml/cffi publish wheels for newer Pythons; 3.15 forced source builds and broke CI",
+      "matchFileNames": ["faraday/Dockerfile"],
+      "matchPackageNames": ["python"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
     }
   ]
 }
