@@ -25,7 +25,7 @@ COPY --from=source /app/docker/server.ini /docker_server.ini
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       curl ca-certificates python3-dev build-essential libgdk-pixbuf2.0-0 \
-      libpq-dev libsasl2-dev libldap2-dev libssl-dev libmagic1 redis-tools netcat-traditional \
+      libpq-dev libxml2-dev libxslt1-dev libsasl2-dev libldap2-dev libssl-dev libmagic1 redis-tools netcat-traditional \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* \
     && chmod +x /entrypoint.sh
