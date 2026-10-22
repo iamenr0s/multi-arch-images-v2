@@ -8,7 +8,7 @@ ARG FINAL_IMAGE=${GVM_LIBS}:${VERSION}
 ARG FINAL_PACKAGE_SET=${VERSION}
 
 # Stage 1: Clone upstream source (includes the .docker/ build files and Makefile)
-FROM alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS source
+FROM alpine:3.24@sha256:c6b073f8e9e58d881f6ffba6ebf3b9ebd60b9e7d6e8337018c0e68bb5c356873 AS source
 ARG OPENVAS_SCANNER_REF=main
 # make -C /app/.docker fetches and extracts the vendored krb5/libpcap
 # source trees the static builds below need; upstream ships this as a
