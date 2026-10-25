@@ -1,4 +1,4 @@
-FROM registry.fedoraproject.org/fedora:46@sha256:09cf04ce018b908094f602dc7a08a3a29f63e69814f007bf58850df0129477ec
+FROM registry.fedoraproject.org/fedora:46@sha256:02031526999d46c9f9c6490eeccf4cafd735438b9d0fb5e1d9fc941d7886e2ff
 LABEL maintainer="iamenr0s"
 
 ARG BUILD_DATE
