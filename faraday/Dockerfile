@@ -5,7 +5,7 @@ RUN apk add --no-cache git \
     && git clone --depth 1 --branch ${FARADAY_REF} https://github.com/infobyte/faraday /app
 
 # Stage 2: Runtime
-FROM python:3.14-slim-bookworm@sha256:945c2676dc2b18e0c1f16879244122c57c0ffede60006bf3df159c507a31bcae
+FROM python:3.14-slim-bookworm@sha256:9974e24551f9e7ca172cf284d85b8ab3e031d22d945f7026ede7a8279118c9f1
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_DATE=unknown
