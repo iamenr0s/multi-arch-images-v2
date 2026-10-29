@@ -14,7 +14,15 @@ RUN apk add --no-cache git
 RUN git clone --depth 1 --branch "${HARBOR_REF}" https://github.com/goharbor/harbor.git /src
 
 #
-# Stage 2: runtime — photon:5.0 with Postgres 14 *and* 15 installed. Harbor's
+# Stage 2: pg14 — upstream harbor-db, used only as a source of the Postgres 14
+# binaries and their ICU 72 libs. Photon's updates repo currently ships
+# postgresql14-server built against ICU 76 while icu itself is 78, so it is
+# uninstallable via tdnf. Drop this stage once Photon rebuilds postgresql14.
+#
+FROM goharbor/harbor-db:${HARBOR_REF} AS pg14
+
+#
+# Stage 3: runtime — photon:5.0 with Postgres 15 from tdnf and 14 from pg14. Harbor's
 # upgrade.sh uses both to migrate data across major versions on first boot.
 #
 FROM photon:5.0@sha256:3d7e9a35fd55277a056d9e1c54841e6b862a8df7e0caa56fa9c0453969f5329d
@@ -40,7 +48,6 @@ ENV PGDATA=/var/lib/postgresql/data
 RUN tdnf install -y shadow >> /dev/null \
     && groupadd -r postgres --gid=999 \
     && useradd -m -r -g postgres --uid=999 postgres \
-    && tdnf install -y postgresql14-server >> /dev/null \
     && tdnf install -y gzip postgresql15-server findutils bc >> /dev/null \
     && mkdir -p /docker-entrypoint-initdb.d /run/postgresql "${PGDATA}" \
     && chown -R postgres:postgres /run/postgresql "${PGDATA}" \
@@ -53,6 +60,9 @@ RUN tdnf install -y shadow >> /dev/null \
     && tdnf clean all \
     && tdnf erase -y toybox \
     && tdnf install -y util-linux net-tools
+
+COPY --from=pg14 /usr/pgsql/14 /usr/pgsql/14
+COPY --from=pg14 /usr/lib/libicu*.so.72* /usr/lib/
 
 VOLUME /var/lib/postgresql/data
 
