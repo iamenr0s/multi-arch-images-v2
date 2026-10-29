@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 FROM runtime_base AS builder
 
-COPY --from=composer:latest@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 /usr/bin/composer /usr/bin/composer
 
 RUN apt-get update && apt-get install -y --no-install-recommends git unzip \
     && rm -rf /var/lib/apt/lists/*
