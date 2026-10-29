@@ -2,7 +2,8 @@
 FROM alpine:3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a AS source
 ARG FARADAY_REF=master
 RUN apk add --no-cache git \
-    && git clone --depth 1 --branch ${FARADAY_REF} https://github.com/infobyte/faraday /app
+    && git clone --depth 1 --branch ${FARADAY_REF} https://github.com/infobyte/faraday /app \
+    && rm -f /app/.venv
 
 # Stage 2: Runtime
 FROM python:3.14-slim-bookworm@sha256:516b51cb9db2ef061e465c803e50f64361b82cefd91e525b889b967b83e83527
