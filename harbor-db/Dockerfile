@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.28@sha256:bb22d9815c728170f72750f4e5b0d672e06176142e1d602c7e66c050100b7e5b
 
-ARG HARBOR_REF=v2.15.0
+ARG HARBOR_REF=v2.15.0@sha256:b54e48a70a7bc173a213f59d826d09bd5d3ad94ab00f2b3335751ff43edeb842
 
 #
 # Stage 1: fetch — clone Harbor to pull the db/* scripts. No compilation needed,
