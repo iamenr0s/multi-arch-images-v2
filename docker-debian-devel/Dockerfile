@@ -1,3 +1,3 @@
-FROM iamenr0s/baseimage:latest@sha256:9ce59e9a9a5d0e717a9189ee175b03c282e502065b1bd25cb93a1d9137c1df3a
+FROM iamenr0s/baseimage:latest@sha256:15f901f659c6d76be7a5e4015f16bde5dd5322dc9615cad97536fd7c51126a66
 
 RUN apt-get -y update && apt-get install -y build-essential autoconf automake checkinstall git
