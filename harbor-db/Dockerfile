@@ -6,7 +6,7 @@ ARG HARBOR_REF=v2.15.4@sha256:a32d51e636d76303e086a7c5251a2c8415c6f165b2f87bafa9
 # Stage 1: fetch — clone Harbor to pull the db/* scripts. No compilation needed,
 # so use a tiny image on BUILDPLATFORM.
 #
-FROM alpine:3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a AS fetcher
+FROM alpine:3.24@sha256:3f4d6b32e26703c6082839234f43769d5046b3ac7c910033911d1e71d8cd630a AS fetcher
 
 ARG HARBOR_REF
 
