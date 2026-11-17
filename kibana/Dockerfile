@@ -1,4 +1,4 @@
-FROM almalinux:10@sha256:5a4b41a427c9717be8f4ac2a32aa22efbae5f9124fbcb79a6765394f312acfe8 AS prep_files
+FROM almalinux:10@sha256:ccf217024b3d5e268cc208d1edb384a1edee6359370cf6ea1ecbc42254e57375 AS prep_files
 
 ARG KIBANA_VERSION=9.3.2
 ARG NODEJS_VERSION=v25.6.1
@@ -36,7 +36,7 @@ RUN set -eux; \
 RUN chmod -R g=u /usr/share/kibana
 RUN find /usr/share/kibana -type d -exec chmod g+s {} \;
 
-FROM almalinux:10@sha256:5a4b41a427c9717be8f4ac2a32aa22efbae5f9124fbcb79a6765394f312acfe8
+FROM almalinux:10@sha256:ccf217024b3d5e268cc208d1edb384a1edee6359370cf6ea1ecbc42254e57375
 EXPOSE 5601
 
 RUN yum update -y && yum install -y fontconfig freetype shadow-utils && yum clean all
