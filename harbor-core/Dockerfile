@@ -6,7 +6,7 @@ ARG SWAGGER_VERSION=v0.33.1
 #
 # Stage 1: builder — cross-compile harbor_core on the build host's native arch
 #
-FROM golang:1.27.4@sha256:5e8afd493a7124a8586e134d9b532731161d4b9becf9dee5a5956b107426f93d AS builder
+FROM golang:1.27.4@sha256:205c7636d74e0ffbe3d007162df7d74f859f5a8c8322dfb9f907977686c126cf AS builder
 
 ARG HARBOR_REF
 ARG SWAGGER_VERSION
