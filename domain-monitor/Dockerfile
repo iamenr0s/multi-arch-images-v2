@@ -1,4 +1,4 @@
-FROM php:8.5-apache-bookworm@sha256:dbc0a3eb85e639cc8158ae74e83448064473a7fa78e90a1b0dfb7c4ee14497e3 AS runtime_base
+FROM php:8.6-apache-bookworm@sha256:bb897f1eb09fb4680301415a7832b001c548edc6d7e480e72636c87a69e985d8 AS runtime_base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
