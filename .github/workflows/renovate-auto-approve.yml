@@ -1,7 +1,7 @@
 name: Renovate auto-approve
 
 on:
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] -- no PR code checked out; approve-only, author-gated
     types: [opened, synchronize, reopened]
 
 permissions:
