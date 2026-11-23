@@ -20,6 +20,19 @@
       "matchFileNames": ["harbor-db/Dockerfile"],
       "matchPackageNames": ["goharbor/harbor-db"],
       "allowedVersions": "/^v2\\.15\\.[01]$/"
+    },
+    {
+      "description": "csi-external-provisioner: hold at v5; v6 requires Kubernetes 1.34+",
+      "matchPackageNames": ["kubernetes-csi/external-provisioner"],
+      "allowedVersions": "/^v5\\./"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Upstream source versions annotated with a '# renovate:' comment above ARG VERSION",
+      "managerFilePatterns": ["/(^|/)Dockerfile$/"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\nARG VERSION=(?<currentValue>\\S+)"]
     }
   ]
 }
