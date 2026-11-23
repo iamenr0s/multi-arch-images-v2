@@ -39,10 +39,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          LATEST_TAG=$(curl -sf --retry 3 --retry-all-errors -H "Authorization: Bearer ${GH_TOKEN}" \
-            "https://api.github.com/repos/goharbor/harbor/releases?per_page=100" \
-            | jq -r '[.[] | select(.prerelease == false) | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name][]' \
-            | sort -V | tail -1)
+          # The Dockerfile's HARBOR_REF pin (held by Renovate) is the source of truth, not upstream's latest release.
+          LATEST_TAG=$(sed -n 's/^ARG HARBOR_REF=\([^@]*\).*/\1/p' harbor-db/Dockerfile)
           if [[ -z "${LATEST_TAG}" ]]; then
             echo "ERROR: Could not determine upstream harbor version" >&2
             exit 1
@@ -97,7 +95,6 @@ jobs:
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
             --build-arg "BUILD_DATE=${BUILD_DATE}" \
-            --build-arg "HARBOR_REF=${VERSION}" \
             -f harbor-db/Dockerfile \
             harbor-db/
 
@@ -113,7 +110,6 @@ jobs:
             --build-arg "VERSION=${VERSION}" \
             --build-arg "COMMIT=${COMMIT}" \
             --build-arg "BUILD_DATE=${BUILD_DATE}" \
-            --build-arg "HARBOR_REF=${VERSION}" \
             -f harbor-db/Dockerfile \
             harbor-db/
 
