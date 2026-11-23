@@ -11,7 +11,8 @@ FROM alpine:3.24@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5
 ARG HARBOR_REF
 
 RUN apk add --no-cache git
-RUN git clone --depth 1 --branch "${HARBOR_REF}" https://github.com/goharbor/harbor.git /src
+# HARBOR_REF carries a Renovate digest pin for the FROM below; git needs the bare tag.
+RUN git clone --depth 1 --branch "${HARBOR_REF%@*}" https://github.com/goharbor/harbor.git /src
 
 #
 # Stage 2: pg14 — upstream harbor-db, used only as a source of the Postgres 14
