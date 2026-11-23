@@ -14,6 +14,12 @@
       "matchPackageNames": ["python"],
       "matchUpdateTypes": ["major", "minor"],
       "enabled": false
+    },
+    {
+      "description": "harbor-db: hold at Harbor 2.15.1; 2.15.2+ switched to Postgres 15/18 and this image copies the PG14 binaries from upstream",
+      "matchFileNames": ["harbor-db/Dockerfile"],
+      "matchPackageNames": ["goharbor/harbor-db"],
+      "allowedVersions": "/^v2\\.15\\.[01]$/"
     }
   ]
 }

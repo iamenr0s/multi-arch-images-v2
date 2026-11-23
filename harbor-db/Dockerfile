@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.29@sha256:572cebbc2b15e6f84c077742952674889cb63cd5e9b80abdffcbe587b6f19183
 
-ARG HARBOR_REF=v2.16.0@sha256:c488ba5d4c27bd8cdf74dae6948f38babce318320c6b7c0b93466561709e8ab6
+ARG HARBOR_REF=v2.15.1@sha256:7944d8594a48a8d014e1fa440bc788348f2a779fa2c612ed6b79390cd767e6db
 
 #
 # Stage 1: fetch — clone Harbor to pull the db/* scripts. No compilation needed,
@@ -64,6 +64,8 @@ RUN tdnf install -y shadow >> /dev/null \
 
 COPY --from=pg14 /usr/pgsql/14 /usr/pgsql/14
 COPY --from=pg14 /usr/lib/libicu*.so.72* /usr/lib/
+# Photon now ships libxml2.so.16; PG14 was linked against .so.2.
+COPY --from=pg14 /usr/lib/libxml2.so.2* /usr/lib/
 
 VOLUME /var/lib/postgresql/data
 
