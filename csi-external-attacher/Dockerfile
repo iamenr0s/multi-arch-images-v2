@@ -1,6 +1,6 @@
 FROM golang:1.27-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280 AS builder
 # renovate: datasource=github-releases depName=kubernetes-csi/external-attacher
-ARG VERSION=v4.13.0
+ARG VERSION=v4.13.1
 ARG TARGETPLATFORM
 WORKDIR /go/src/github.com/kubernetes-csi/external-attacher/
 RUN apk add --no-cache git make bash
