@@ -8,7 +8,7 @@ ARG REGISTRY_SRC_TAG=v2.8.3-harbor.1-rc.1
 # binary from goharbor/distribution. registryctl bundles the registry binary
 # because it orchestrates registry-side GC operations.
 #
-FROM golang:1.27.4@sha256:87f49b77a7b6a99ad7dc656be010ae453322459dd2ed902ac177649a302bc101 AS builder
+FROM golang:1.27.4@sha256:5f1b98fa02fe396ebce2a0227a0e08309e11792915b9dd2e1f71053d7e7e6666 AS builder
 
 ARG HARBOR_REF
 ARG REGISTRY_SRC_TAG
